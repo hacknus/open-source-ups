@@ -1,0 +1,32 @@
+[package]
+name = "open-source-ups"
+version = "0.1.0"
+edition = "2021"
+
+
+[profile.release]
+opt-level = "s"
+lto = true
+debug = true
+codegen-units = 1
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[build-dependencies]
+freertos-cargo-build = "*"
+
+[dependencies]
+embedded-hal = "0.2"
+nb = "1"
+cortex-m = "0.7"
+cortex-m-rt = "0.7"
+# Panic behaviour, see https://crates.io/keywords/panic-impl for alternatives
+panic-halt = "0.2"
+rtt-target = {version="0.3.1",  features = ["cortex-m"]}
+usb-device = "0.2.9"
+usbd-serial = "0.1.1"
+arrform = "0.1.1"
+freertos-rust = "*"
+
+[dependencies.stm32f4xx-hal]
+git = "https://github.com/stm32-rs/stm32f4xx-hal"
+features = ["rt", "stm32f405", "usb_fs"] # replace the model of your microcontroller here
