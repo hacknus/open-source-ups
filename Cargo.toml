@@ -23,8 +23,7 @@ cortex-m-rt = "0.7"
 panic-halt = "0.2"
 rtt-target = {version="0.3.1",  features = ["cortex-m"]}
 usb-device = "0.2.9"
-usbd-serial = "0.1.1"
-arrform = "0.1.1"
+usbd-hid = "0.6.2"
 freertos-rust = "*"
 
 [dependencies.stm32f4xx-hal]

@@ -11,7 +11,7 @@ use cortex_m::asm;
 use cortex_m_rt::exception;
 use cortex_m_rt::{entry, ExceptionFrame};
 use panic_halt as _;
-use stm32f4xx_hal::otg_fs::{USB};
+use stm32f4xx_hal::otg_fs::{USB, UsbBus};
 use stm32f4xx_hal::{
     pac::{self, Interrupt},
     gpio::{Edge},
@@ -19,19 +19,61 @@ use stm32f4xx_hal::{
 };
 use crate::commands::{process_ups_command};
 use crate::devices::led::LED;
-use crate::usb::{usb_init, usb_println, usb_read};
 use crate::intrpt::{G_BUTTON, G_STATE};
 
 use freertos_rust::*;
 use core::alloc::Layout;
+use usb_device::bus::{UsbBusAllocator};
+use usb_device::device::{UsbDeviceBuilder, UsbVidPid};
 
 mod devices;
-mod usb;
 mod commands;
 mod intrpt;
 
 #[global_allocator]
 static GLOBAL: FreeRtosAllocator = FreeRtosAllocator;
+
+use usbd_hid::descriptor::{SerializedDescriptor, generator_prelude::*};
+use usbd_hid::hid_class::HIDClass;
+
+const HID_REPORT_DESCRIPTOR: &[u8] = &[
+    0x05, 0x84,                    // Usage Page (Power Device)
+    0x09, 0x04,                    // Usage (UPS)
+    0xa1, 0x01,                    // Collection (Application)
+    0x85, 0x01,                    // Report ID (1)
+    0x09, 0x20,                    // Usage (Power Summary)
+    0xa1, 0x00,                    // Collection (Physical)
+    0x09, 0x40,                    // Usage (Power Status)
+    0x75, 0x08,                    // Report Size (8 bits)
+    0x95, 0x01,                    // Report Count (1)
+    0x81, 0x82,                    // Input (Data,Var,Abs,Vol)
+    0xc0,                          // End Collection
+    0xc0,                          // End Collection
+];
+
+// Define a custom report structure that implements AsInputReport
+#[derive(Debug)]
+struct PowerStatusReport {
+    status: u8,
+}
+
+impl Serialize for PowerStatusReport {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer
+    {
+        serializer.serialize_u8(self.status)
+    }
+}
+
+impl AsInputReport for PowerStatusReport {
+
+}
+static mut EP_MEMORY: [u32; 1024] = [0; 1024];
+
+// Define a global USB bus allocator
+static mut USB_BUS_ALLOCATOR: Option<UsbBusAllocator<UsbBus<USB>>> = None;
+
 
 #[entry]
 fn main() -> ! {
@@ -85,7 +127,6 @@ fn main() -> ! {
     delay.delay(100.millis());
 
     unsafe {
-        usb_init(usb);
         cortex_m::peripheral::NVIC::unmask(Interrupt::OTG_FS);
         // Enable the external interrupt in the NVIC by passing the button interrupt number
         cortex_m::peripheral::NVIC::unmask(sw.interrupt());
@@ -95,6 +136,21 @@ fn main() -> ! {
     cortex_m::interrupt::free(|cs| {
         G_BUTTON.borrow(cs).replace(Some(sw));
     });
+
+    // Initialize the global USB bus allocator
+    unsafe {
+        USB_BUS_ALLOCATOR = Some(UsbBus::new(usb, &mut EP_MEMORY));
+    }
+
+    // Create a new USB bus instance
+    let usb_bus = unsafe { USB_BUS_ALLOCATOR.as_ref().unwrap() };
+    let mut hid = HIDClass::new(&usb_bus, HID_REPORT_DESCRIPTOR, 1);
+    let mut usb_dev = UsbDeviceBuilder::new(&usb_bus, UsbVidPid(0x051D, 0x0001))
+        .manufacturer("Linus Leo Stöckli")
+        .product("UPS")
+        .serial_number("UPS10")
+        .device_class(0)
+        .build();
 
     stat_led.on();
 
@@ -124,13 +180,15 @@ fn main() -> ! {
         .priority(TaskPriority(3))
         .start(move || {
             loop {
-                let mut message_bytes = [0; 1024];
-                if usb_read(&mut message_bytes) {
-                    stat_led.toggle();
-                    let response = process_ups_command(&message_bytes);
-                    usb_println(response);
-                    stat_led.toggle();
+                // Poll the USB device
+                if !usb_dev.poll(&mut [&mut hid]) {
+                    continue;
                 }
+
+                // Example: Send a report
+                let power_status_report = PowerStatusReport { status: 0x01 }; // Replace with actual status data
+                hid.push_input(&power_status_report).ok();
+                CurrentTask::delay(Duration::ms(5));
             }
         }).unwrap();
 
@@ -140,7 +198,6 @@ fn main() -> ! {
         .priority(TaskPriority(2))
         .start(move || {
             loop {
-
                 CurrentTask::delay(Duration::ms(500));
                 fault_1_led.toggle();
             }
