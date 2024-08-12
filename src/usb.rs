@@ -22,11 +22,11 @@ pub unsafe fn usb_init(usb: USB) {
     USB_BUS = Some(stm32f4xx_hal::otg_fs::UsbBusType::new(usb, &mut EP_MEMORY));
     let usb_bus = USB_BUS.as_ref().unwrap();
     let mut hid = HIDClass::new(&usb_bus, HID_REPORT_DESCRIPTOR, 1);
-    let mut usb_dev = UsbDeviceBuilder::new(&usb_bus, UsbVidPid(0x051D, 0x0001))
+    let mut usb_dev = UsbDeviceBuilder::new(&usb_bus, UsbVidPid(0x03f0, 0x1f06))
         .manufacturer("Linus Leo Stöckli")
         .product("UPS")
         .serial_number("UPS10")
-        .device_class(0)
+        .device_class(0x03)
         .build();
 
     cortex_m::interrupt::free(|cs| {

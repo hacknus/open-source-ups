@@ -38,20 +38,147 @@ use usbd_hid::descriptor::{SerializedDescriptor, generator_prelude::*};
 use usbd_hid::hid_class::HIDClass;
 use crate::usb::{G_USB_HID, usb_init};
 
-const HID_REPORT_DESCRIPTOR: &[u8] = &[
-    0x05, 0x84,                    // Usage Page (Power Device)
-    0x09, 0x04,                    // Usage (UPS)
-    0xa1, 0x01,                    // Collection (Application)
-    0x85, 0x01,                    // Report ID (1)
-    0x09, 0x20,                    // Usage (Power Summary)
-    0xa1, 0x00,                    // Collection (Physical)
-    0x09, 0x40,                    // Usage (Power Status)
-    0x75, 0x08,                    // Report Size (8 bits)
-    0x95, 0x01,                    // Report Count (1)
-    0x81, 0x82,                    // Input (Data,Var,Abs,Vol)
-    0xc0,                          // End Collection
-    0xc0,                          // End Collection
+const HID_PD_IPRODUCT: u8 = 1;
+const HID_PD_SERIAL: u8 = 2;
+const HID_PD_MANUFACTURER: u8 = 3;
+const HID_PD_RECHARGEABLE: u8 = 6;
+const HID_PD_IDEVICECHEMISTRY: u8 = 0x04;
+const HID_PD_IOEMINFORMATION: u8 = 32;
+const HID_PD_CAPACITYMODE: u8 = 22;
+const HID_PD_CPCTYGRANULARITY1: u8 = 16;
+const HID_PD_CPCTYGRANULARITY2: u8 = 24;
+const HID_PD_FULLCHRGECAPACITY: u8 = 14;
+const HID_PD_DESIGNCAPACITY: u8 = 23;
+const HID_PD_REMAININGCAPACITY: u8 = 12;
+const HID_PD_WARNCAPACITYLIMIT: u8 = 15;
+const HID_PD_REMNCAPACITYLIMIT: u8 = 17;
+const HID_PD_MANUFACTUREDATE: u8 = 9;
+const HID_PD_AVERAGETIME2FULL: u8 = 26;
+const HID_PD_AVERAGETIME2EMPTY: u8 = 28;
+const HID_PD_RUNTIMETOEMPTY: u8 = 13;
+const HID_PD_REMAINTIMELIMIT: u8 = 8;
+const HID_PD_DELAYBE4SHUTDOWN: u8 = 18;
+const HID_PD_DELAYBE4REBOOT: u8 = 19;
+const HID_PD_CONFIGVOLTAGE: u8 = 10;
+const HID_PD_VOLTAGE: u8 = 11;
+const HID_PD_AUDIBLEALARMCTRL: u8 = 20;
+const HID_PD_PRESENTSTATUS: u8 = 7;
+
+const IPRODUCT: u8 = 2;
+const ISERIAL: u8 = 3;
+const IMANUFACTURER: u8 = 1;
+const IDEVICECHEMISTRY: u8 = 4;
+const IOEMVENDOR: u8 = 5;
+
+static HID_REPORT_DESCRIPTOR: &[u8] = &[
+    0x05, 0x84, // USAGE_PAGE (Power Device)
+    0x09, 0x04, // USAGE (UPS)
+    0xA1, 0x01, // COLLECTION (Application)
+    0x09, 0x24, //   USAGE (Sink)
+    0xA1, 0x02, //   COLLECTION (Logical)
+    0x75, 0x08, //     REPORT_SIZE (8)
+    0x95, 0x01, //     REPORT_COUNT (1)
+    0x15, 0x00, //     LOGICAL_MINIMUM (0)
+    0x26, 0xFF, 0x00, //     LOGICAL_MAXIMUM (255)
+    0x85, HID_PD_IPRODUCT, //     REPORT_ID (HID_PD_IPRODUCT)
+    0x09, 0xFE, //     USAGE (iProduct)
+    0x79, IPRODUCT, //     STRING INDEX (IPRODUCT)
+    0xB1, 0x23, //     FEATURE (Constant, Variable, Absolute, Nonvolatile)
+    0x85, HID_PD_SERIAL, //     REPORT_ID (HID_PD_SERIAL)
+    0x09, 0xFF, //     USAGE (iSerialNumber)
+    0x79, ISERIAL, //     STRING INDEX (ISERIAL)
+    0xB1, 0x23, //     FEATURE (Constant, Variable, Absolute, Nonvolatile)
+    0x85, HID_PD_MANUFACTURER, //     REPORT_ID (HID_PD_MANUFACTURER)
+    0x09, 0xFD, //     USAGE (iManufacturer)
+    0x79, IMANUFACTURER, //     STRING INDEX (IMANUFACTURER)
+    0xB1, 0x23, //     FEATURE (Constant, Variable, Absolute, Nonvolatile)
+    0x05, 0x85, //     USAGE_PAGE (Battery System)
+    0x85, HID_PD_RECHARGEABLE, //     REPORT_ID (HID_PD_RECHARGEABLE)
+    0x09, 0x8B, //     USAGE (Rechargeable)
+    0xB1, 0x23, //     FEATURE (Constant, Variable, Absolute, Nonvolatile)
+    0x85, HID_PD_IDEVICECHEMISTRY, //     REPORT_ID (HID_PD_IDEVICECHEMISTRY)
+    0x09, 0x89, //     USAGE (iDeviceChemistry)
+    0x79, IDEVICECHEMISTRY, //     STRING INDEX (IDEVICECHEMISTRY)
+    0xB1, 0x23, //     FEATURE (Constant, Variable, Absolute, Nonvolatile)
+    0x85, HID_PD_IOEMINFORMATION, //     REPORT_ID (HID_PD_IOEMINFORMATION)
+    0x09, 0x8F, //     USAGE (iOEMInformation)
+    0x79, IOEMVENDOR, //     STRING INDEX (IOEMVENDOR)
+    0xB1, 0x23, //     FEATURE (Constant, Variable, Absolute, Nonvolatile)
+    0x85, HID_PD_CAPACITYMODE, //     REPORT_ID (HID_PD_CAPACITYMODE)
+    0x09, 0x2C, //     USAGE (CapacityMode)
+    0xB1, 0x23, //     FEATURE (Constant, Variable, Absolute, Nonvolatile)
+    0x85, HID_PD_CPCTYGRANULARITY1, //     REPORT_ID (HID_PD_CPCTYGRANULARITY1)
+    0x09, 0x8D, //     USAGE (CapacityGranularity1)
+    0x26, 0x64, 0x00, //     LOGICAL_MAXIMUM (100)
+    0xB1, 0x22, //     FEATURE (Data, Variable, Absolute, Nonvolatile)
+    0x85, HID_PD_CPCTYGRANULARITY2, //     REPORT_ID (HID_PD_CPCTYGRANULARITY2)
+    0x09, 0x8E, //     USAGE (CapacityGranularity2)
+    0xB1, 0x23, //     FEATURE (Constant, Variable, Absolute, Nonvolatile)
+    0x85, HID_PD_FULLCHRGECAPACITY, //     REPORT_ID (HID_PD_FULLCHRGECAPACITY)
+    0x09, 0x67, //     USAGE (FullChargeCapacity)
+    0xB1, 0x83, //     FEATURE (Constant, Variable, Absolute, Volatile)
+    0x85, HID_PD_DESIGNCAPACITY, //     REPORT_ID (HID_PD_DESIGNCAPACITY)
+    0x09, 0x83, //     USAGE (DesignCapacity)
+    0xB1, 0x83, //     FEATURE (Constant, Variable, Absolute, Volatile)
+    0x85, HID_PD_REMAININGCAPACITY, //     REPORT_ID (HID_PD_REMAININGCAPACITY)
+    0x09, 0x66, //     USAGE (RemainingCapacity)
+    0x81, 0xA3, //     INPUT (Constant, Variable, Absolute, Bitfield)
+    0x09, 0x66, //     USAGE (RemainingCapacity)
+    0xB1, 0xA3, //     FEATURE (Constant, Variable, Absolute, Volatile)
+    0x85, HID_PD_WARNCAPACITYLIMIT, //     REPORT_ID (HID_PD_WARNCAPACITYLIMIT)
+    0x09, 0x8C, //     USAGE (WarningCapacityLimit)
+    0xB1, 0xA2, //     FEATURE (Data, Variable, Absolute, Volatile)
+    0x85, HID_PD_REMNCAPACITYLIMIT, //     REPORT_ID (HID_PD_REMNCAPACITYLIMIT)
+    0x09, 0x29, //     USAGE (RemainingCapacityLimit)
+    0xB1, 0xA2, //     FEATURE (Data, Variable, Absolute, Volatile)
+    0x85, HID_PD_MANUFACTUREDATE, //     REPORT_ID (HID_PD_MANUFACTUREDATE)
+    0x09, 0x85, //     USAGE (ManufacturerDate)
+    0x75, 0x10, //     REPORT_SIZE (16)
+    0x27, 0xFF, 0xFF, 0x00, 0x00, //     LOGICAL_MAXIMUM (65534)
+    0xB1, 0xA3, //     FEATURE (Constant, Variable, Absolute, Volatile)
+    0x85, HID_PD_AVERAGETIME2FULL, //     REPORT_ID (HID_PD_AVERAGETIME2FULL)
+    0x09, 0x6A, //     USAGE (AverageTimeToFull)
+    0x27, 0xFF, 0xFF, 0x00, 0x00, //     LOGICAL_MAXIMUM (65535)
+    0xB1, 0xA2, //     FEATURE (Data, Variable, Absolute, Volatile)
+    0x85, HID_PD_AVERAGETIME2EMPTY, //     REPORT_ID (HID_PD_AVERAGETIME2EMPTY)
+    0x09, 0x69, //     USAGE (AverageTimeToEmpty)
+    0xB1, 0xA2, //     FEATURE (Data, Variable, Absolute, Volatile)
+    0x85, HID_PD_RUNTIMETOEMPTY, //     REPORT_ID (HID_PD_RUNTIMETOEMPTY)
+    0x09, 0x68, //     USAGE (RunTimeToEmpty)
+    0xB1, 0xA3, //     FEATURE (Constant, Variable, Absolute, Volatile)
+    0x85, HID_PD_REMAINTIMELIMIT, //     REPORT_ID (HID_PD_REMAINTIMELIMIT)
+    0x09, 0x2A, //     USAGE (RemainingTimeLimit)
+    0xB1, 0xA3, //     FEATURE (Constant, Variable, Absolute, Volatile)
+    0x85, HID_PD_DELAYBE4SHUTDOWN, //     REPORT_ID (HID_PD_DELAYBE4SHUTDOWN)
+    0x09, 0x2B, //     USAGE (DelayBeforeShutdown)
+    0xB1, 0xA3, //     FEATURE (Constant, Variable, Absolute, Volatile)
+    0x85, HID_PD_DELAYBE4REBOOT, //     REPORT_ID (HID_PD_DELAYBE4REBOOT)
+    0x09, 0x87, //     USAGE (DelayBeforeReboot)
+    0xB1, 0xA3, //     FEATURE (Constant, Variable, Absolute, Volatile)
+    0x85, HID_PD_CONFIGVOLTAGE, //     REPORT_ID (HID_PD_CONFIGVOLTAGE)
+    0x09, 0x6D, //     USAGE (ConfigVoltage)
+    0x75, 0x10, //     REPORT_SIZE (16)
+    0x27, 0xFF, 0xFF, 0x00, 0x00, //     LOGICAL_MAXIMUM (65535)
+    0xB1, 0xA3, //     FEATURE (Constant, Variable, Absolute, Volatile)
+    0x85, HID_PD_VOLTAGE, //     REPORT_ID (HID_PD_VOLTAGE)
+    0x09, 0x30, //     USAGE (Voltage)
+    0x81, 0xA2, //     INPUT (Data, Variable, Absolute, Volatile)
+    0x85, HID_PD_AUDIBLEALARMCTRL, //     REPORT_ID (HID_PD_AUDIBLEALARMCTRL)
+    0x09, 0x3A, //     USAGE (AudibleAlarmControl)
+    0x75, 0x02, //     REPORT_SIZE (2)
+    0x15, 0x01, //     LOGICAL_MINIMUM (1)
+    0x25, 0x03, //     LOGICAL_MAXIMUM (3)
+    0xB1, 0xA2, //     FEATURE (Data, Variable, Absolute, Volatile)
+    0x75, 0x06, //     REPORT_SIZE (6)
+    0x81, 0x01, //     INPUT (Constant)
+    0x85, HID_PD_PRESENTSTATUS, //     REPORT_ID (HID_PD_PRESENTSTATUS)
+    0x09, 0x3D, //     USAGE (PresentStatus)
+    0x75, 0x10, //     REPORT_SIZE (16)
+    0xB1, 0xA2, //     FEATURE (Data, Variable, Absolute, Volatile)
+    0xC0, //   END_COLLECTION
+    0xC0, // END_COLLECTION
 ];
+
 
 // Define a custom report structure that implements AsInputReport
 #[derive(Debug)]
