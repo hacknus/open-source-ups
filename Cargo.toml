@@ -22,10 +22,10 @@ cortex-m-rt = "0.7"
 # Panic behaviour, see https://crates.io/keywords/panic-impl for alternatives
 panic-halt = "0.2"
 rtt-target = {version="0.3.1",  features = ["cortex-m"]}
-usb-device = "0.2.9"
-usbd-hid = "0.6.2"
+usb-device = "0.3.2"
+usbd-hid = {git = "https://github.com/hacknus/usbd-hid"}
 freertos-rust = "*"
 
 [dependencies.stm32f4xx-hal]
 git = "https://github.com/stm32-rs/stm32f4xx-hal"
-features = ["rt", "stm32f405", "usb_fs"] # replace the model of your microcontroller here
+features = ["stm32f405", "usb_fs"] # replace the model of your microcontroller here
