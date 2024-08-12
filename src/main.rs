@@ -167,7 +167,7 @@ fn main() -> ! {
                         hid.push_input(&report).ok();
                     };
                 });
-                CurrentTask::delay(Duration::ms(5));
+                CurrentTask::delay(Duration::ms(500));
             }
         }).unwrap();
 
