@@ -166,8 +166,8 @@ fn main() -> ! {
                         stat_led.toggle();
                         hid.push_input(&report).ok();
                     };
-                    CurrentTask::delay(Duration::ms(5));
                 });
+                CurrentTask::delay(Duration::ms(5));
             }
         }).unwrap();
 
