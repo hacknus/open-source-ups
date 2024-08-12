@@ -29,12 +29,14 @@ use usb_device::device::{UsbDeviceBuilder, UsbVidPid};
 mod devices;
 mod commands;
 mod intrpt;
+mod usb;
 
 #[global_allocator]
 static GLOBAL: FreeRtosAllocator = FreeRtosAllocator;
 
 use usbd_hid::descriptor::{SerializedDescriptor, generator_prelude::*};
 use usbd_hid::hid_class::HIDClass;
+use crate::usb::{G_USB_HID, usb_init};
 
 const HID_REPORT_DESCRIPTOR: &[u8] = &[
     0x05, 0x84,                    // Usage Page (Power Device)
@@ -59,16 +61,15 @@ struct PowerStatusReport {
 
 impl Serialize for PowerStatusReport {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer
+        where
+            S: Serializer
     {
         serializer.serialize_u8(self.status)
     }
 }
 
-impl AsInputReport for PowerStatusReport {
+impl AsInputReport for PowerStatusReport {}
 
-}
 static mut EP_MEMORY: [u32; 1024] = [0; 1024];
 
 // Define a global USB bus allocator
@@ -127,6 +128,7 @@ fn main() -> ! {
     delay.delay(100.millis());
 
     unsafe {
+        usb_init(usb);
         cortex_m::peripheral::NVIC::unmask(Interrupt::OTG_FS);
         // Enable the external interrupt in the NVIC by passing the button interrupt number
         cortex_m::peripheral::NVIC::unmask(sw.interrupt());
@@ -136,21 +138,6 @@ fn main() -> ! {
     cortex_m::interrupt::free(|cs| {
         G_BUTTON.borrow(cs).replace(Some(sw));
     });
-
-    // Initialize the global USB bus allocator
-    unsafe {
-        USB_BUS_ALLOCATOR = Some(UsbBus::new(usb, &mut EP_MEMORY));
-    }
-
-    // Create a new USB bus instance
-    let usb_bus = unsafe { USB_BUS_ALLOCATOR.as_ref().unwrap() };
-    let mut hid = HIDClass::new(&usb_bus, HID_REPORT_DESCRIPTOR, 1);
-    let mut usb_dev = UsbDeviceBuilder::new(&usb_bus, UsbVidPid(0x051D, 0x0001))
-        .manufacturer("Linus Leo Stöckli")
-        .product("UPS")
-        .serial_number("UPS10")
-        .device_class(0)
-        .build();
 
     stat_led.on();
 
@@ -180,15 +167,14 @@ fn main() -> ! {
         .priority(TaskPriority(3))
         .start(move || {
             loop {
-                // Poll the USB device
-                if !usb_dev.poll(&mut [&mut hid]) {
-                    continue;
-                }
-
-                // Example: Send a report
-                let power_status_report = PowerStatusReport { status: 0x01 }; // Replace with actual status data
-                hid.push_input(&power_status_report).ok();
-                CurrentTask::delay(Duration::ms(5));
+                cortex_m::interrupt::free(|cs| {
+                    if let Some(hid) = G_USB_HID.borrow(cs).borrow_mut().as_mut() {
+                        // Example: Send a report
+                        let power_status_report = PowerStatusReport { status: 0x01 }; // Replace with actual status data
+                        hid.push_input(&power_status_report).ok();
+                    };
+                    CurrentTask::delay(Duration::ms(5));
+                });
             }
         }).unwrap();
 
