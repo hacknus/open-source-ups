@@ -39,28 +39,16 @@ use usbd_hid::hid_class::HIDClass;
 use crate::usb::{G_USB_DEVICE, G_USB_HID, usb_init};
 #[gen_hid_descriptor(
     (collection = APPLICATION, usage_page = POWER_DEVICE, usage = UPS) = {
-        (collection = LOGICAL, usage = UPS) = {
-            (usage = 0x0C,) = {
-                #[item_settings data,variable,absolute] remaining_capacity=input;
-            };
-            (usage = 0x0C,) = {
-                #[item_settings data,variable,absolute] voltage=input;
-            };
-            (usage = 0x0C,) = {
-                #[item_settings data,variable,absolute] current=input;
-            };
-            (usage = 0x0C,) = {
-                #[item_settings data,variable,absolute] runtime_to_empty=input;
-            };
-        };
+    (collection = LOGICAL, usage = UPS) = {
+    (usage = 0x0C,) = {
+    # [item_settings data, variable, absolute] remaining_capacity = input;
+    };
+    };
     }
 )]
 #[allow(dead_code)]
 pub struct PowerStatusReport {
-    pub remaining_capacity: u16,
-    pub voltage: u16,
-    pub current: i16,
-    pub runtime_to_empty: u16,
+    pub remaining_capacity: u8,
 }
 
 #[entry]
@@ -159,9 +147,6 @@ fn main() -> ! {
                         // Example: Send a report
                         let report = PowerStatusReport {
                             remaining_capacity: 50,
-                            voltage: 2,
-                            current: 3,
-                            runtime_to_empty: 4,
                         };
                         stat_led.toggle();
                         hid.push_input(&report).ok();
