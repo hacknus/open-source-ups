@@ -39,11 +39,9 @@ use usbd_hid::hid_class::HIDClass;
 use crate::usb::{G_USB_DEVICE, G_USB_HID, usb_init};
 #[gen_hid_descriptor(
     (collection = APPLICATION, usage_page = POWER_DEVICE, usage = UPS) = {
-    (collection = LOGICAL, usage = UPS) = {
-    (usage = 0x0C,) = {
-    # [item_settings data, variable, absolute] remaining_capacity = input;
-    };
-    };
+            (usage = 0x0C,) = {
+                # [item_settings data, variable, absolute] remaining_capacity = input;
+            };
     }
 )]
 #[allow(dead_code)]
