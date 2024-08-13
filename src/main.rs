@@ -139,17 +139,17 @@ fn main() -> ! {
         .stack_size(1024)
         .priority(TaskPriority(3))
         .start(move || {
-            let mut report = Report::default();
-            report.Voltage = 5;
-            report.RemainingCapacity = 50;
+            // let mut report = Report::default();
+            // report.Voltage = 5;
+            // report.RemainingCapacity = 50;
             loop {
-                cortex_m::interrupt::free(|cs| {
-                    if let Some(hid) = G_USB_HID.borrow(cs).borrow_mut().as_mut() {
-                        // Example: Send a report
-                        hid.push_input(&report);
-                        stat_led.toggle();
-                    };
-                });
+                //     cortex_m::interrupt::free(|cs| {
+                //         if let Some(hid) = G_USB_HID.borrow(cs).borrow_mut().as_mut() {
+                //             // Example: Send a report
+                //             hid.push_input(&report);
+                //             stat_led.toggle();
+                //         };
+                //     });
                 CurrentTask::delay(Duration::ms(500));
             }
         }).unwrap();

@@ -1,4 +1,5 @@
 use core::cell::RefCell;
+use core::ptr::read;
 use cortex_m::interrupt::Mutex;
 use stm32f4xx_hal::otg_fs::{UsbBus, USB};
 use stm32f4xx_hal::pac::{interrupt};
@@ -6,8 +7,6 @@ use usb_device::prelude::*;
 use usb_device::bus::UsbBusAllocator;
 use usbd_hid::hid_class::HIDClass;
 use usbd_hid::descriptor::{SerializedDescriptor, generator_prelude::*, MouseReport};
-
-
 
 pub const HID_PD_IPRODUCT: u8 = 0x01;               // FEATURE ONLY
 pub const HID_PD_SERIAL: u8 = 0x02;                 // FEATURE ONLY
@@ -225,7 +224,7 @@ static HID_REPORT_DESCRIPTOR: [u8; 532] = [
     0x95, 0x01,
     0x66, 0x01, 0x10,
     0x15, 0xff,
-    0x27, 0xfe, 0xff, 0x00,0x00,
+    0x27, 0xfe, 0xff, 0x00, 0x00,
     0xb1, 0x82,
     0x09, 0x56,
     0x85, 0x11,
@@ -408,6 +407,9 @@ pub static G_USB_HID: Mutex<RefCell<Option<HIDClass<UsbBus<USB>>>>> =
 pub static G_USB_DEVICE: Mutex<RefCell<Option<UsbDevice<UsbBus<USB>>>>> =
     Mutex::new(RefCell::new(None));
 
+pub static G_HID_REPORT: Mutex<RefCell<Option<Report>>> =
+    Mutex::new(RefCell::new(None));
+
 #[allow(dead_code)]
 pub unsafe fn usb_init(usb: USB) {
     static mut EP_MEMORY: [u32; 1024] = [0; 1024];
@@ -423,9 +425,13 @@ pub unsafe fn usb_init(usb: USB) {
             .serial_number("UPS10")])
         .unwrap()
         .build();
+    let mut report = Report::default();
+    report.Voltage = 5;
+    report.RemainingCapacity = 50;
     cortex_m::interrupt::free(|cs| {
         *G_USB_HID.borrow(cs).borrow_mut() = Some(hid);
         *G_USB_DEVICE.borrow(cs).borrow_mut() = Some(usb_dev);
+        *G_HID_REPORT.borrow(cs).borrow_mut() = Some(report);
     });
 }
 
@@ -442,6 +448,9 @@ fn OTG_FS() {
                     Some(hid) => {
                         // do this regularly to keep connection to USB host
                         usb_dev.poll(&mut [hid]);
+                        if let Some(report) = G_HID_REPORT.borrow(cs).borrow_mut().as_mut() {
+                            hid.push_input(report);
+                        }
                     }
                 }
             }
