@@ -25,29 +25,20 @@ use freertos_rust::*;
 use core::alloc::Layout;
 use usb_device::bus::{UsbBusAllocator};
 use usb_device::device::{UsbDeviceBuilder, UsbVidPid};
+use crate::report::{Report};
 
 mod devices;
 mod commands;
 mod intrpt;
 mod usb;
+mod report;
 
 #[global_allocator]
 static GLOBAL: FreeRtosAllocator = FreeRtosAllocator;
 
-use usbd_hid::descriptor::{SerializedDescriptor, generator_prelude::*, MouseReport};
-use usbd_hid::hid_class::HIDClass;
-use crate::usb::{G_USB_DEVICE, G_USB_HID, Report, usb_init};
-#[gen_hid_descriptor(
-    (collection = APPLICATION, usage_page = POWER_DEVICE, usage = UPS) = {
-    (usage = 0x0C,) = {
-    # [item_settings data, variable, absolute] remaining_capacity = input;
-    };
-    }
-)]
-#[allow(dead_code)]
-pub struct PowerStatusReport {
-    pub remaining_capacity: u8,
-}
+
+use crate::usb::{G_USB_DEVICE, G_USB_HID, usb_init};
+
 
 #[entry]
 fn main() -> ! {
@@ -139,17 +130,15 @@ fn main() -> ! {
         .stack_size(1024)
         .priority(TaskPriority(3))
         .start(move || {
-            // let mut report = Report::default();
-            // report.Voltage = 5;
-            // report.RemainingCapacity = 50;
+            let mut report = Report::new(50);
             loop {
-                //     cortex_m::interrupt::free(|cs| {
-                //         if let Some(hid) = G_USB_HID.borrow(cs).borrow_mut().as_mut() {
-                //             // Example: Send a report
-                //             hid.push_input(&report);
-                //             stat_led.toggle();
-                //         };
-                //     });
+                cortex_m::interrupt::free(|cs| {
+                    if let Some(hid) = G_USB_HID.borrow(cs).borrow_mut().as_mut() {
+                        // Example: Send a report
+                        hid.send_report(&report);
+                        stat_led.toggle();
+                    };
+                });
                 CurrentTask::delay(Duration::ms(500));
             }
         }).unwrap();

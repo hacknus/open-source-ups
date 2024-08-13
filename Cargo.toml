@@ -23,7 +23,7 @@ cortex-m-rt = "0.7"
 panic-halt = "0.2"
 rtt-target = {version="0.3.1",  features = ["cortex-m"]}
 usb-device = "0.3.2"
-usbd-hid = {git = "https://github.com/hacknus/usbd-hid"}
+usbd-hid-device = { git = "https://github.com/hacknus/usbd-hid-device" }
 freertos-rust = "*"
 
 [dependencies.stm32f4xx-hal]
