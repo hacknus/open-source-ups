@@ -135,11 +135,37 @@ fn main() -> ! {
                 cortex_m::interrupt::free(|cs| {
                     if let Some(hid) = G_USB_HID.borrow(cs).borrow_mut().as_mut() {
                         // Example: Send a report
-                        report.bytes = [HID_PD_REMAININGCAPACITY, 50, 8];
+                        report.bytes = [HID_PD_REMAININGCAPACITY, 50, 8,0];
                         hid.send_report(&report);
-                        report.bytes = [HID_PD_RUNTIMETOEMPTY, 20, 8];
+                        // report.bytes = [HID_PD_RUNTIMETOEMPTY, 20, 1];
+                        // hid.send_report(&report);
+                        // report.bytes = [HID_PD_PRESENTSTATUS, 0x00, 1];
+                        // hid.send_report(&report);
+                        stat_led.toggle();
+                    };
+                });
+                CurrentTask::delay(Duration::ms(500));
+                cortex_m::interrupt::free(|cs| {
+                    if let Some(hid) = G_USB_HID.borrow(cs).borrow_mut().as_mut() {
+                        // Example: Send a report
+                        // report.bytes = [HID_PD_REMAININGCAPACITY, 50, 1];
+                        // hid.send_report(&report);
+                        report.bytes = [HID_PD_RUNTIMETOEMPTY, 20, 8, 16];
                         hid.send_report(&report);
-                        report.bytes = [HID_PD_PRESENTSTATUS, 0x00, 8];
+                        // report.bytes = [HID_PD_PRESENTSTATUS, 0x00, 1];
+                        // hid.send_report(&report);
+                        stat_led.toggle();
+                    };
+                });
+                CurrentTask::delay(Duration::ms(500));
+                cortex_m::interrupt::free(|cs| {
+                    if let Some(hid) = G_USB_HID.borrow(cs).borrow_mut().as_mut() {
+                        // Example: Send a report
+                        // report.bytes = [HID_PD_REMAININGCAPACITY, 50, 1];
+                        // hid.send_report(&report);
+                        // report.bytes = [HID_PD_RUNTIMETOEMPTY, 20, 8, 16];
+                        // hid.send_report(&report);
+                        report.bytes = [HID_PD_PRESENTSTATUS, 0b1100, 8,0];
                         hid.send_report(&report);
                         stat_led.toggle();
                     };

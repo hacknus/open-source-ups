@@ -48,13 +48,13 @@ pub struct Report {
     // byte 0: ID
     // byte 1: remaining
     // byte 2: size of remaining
-    pub bytes: [u8; 3],
+    pub bytes: [u8; 4],
 }
 
 impl Report {
     pub fn new(remaining: u8) -> Self {
         Report {
-            bytes: [HID_PD_REMAININGCAPACITY, remaining, 8],
+            bytes: [HID_PD_REMAININGCAPACITY, remaining, 8 ,0],
         }
     }
 }
