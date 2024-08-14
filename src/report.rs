@@ -79,7 +79,7 @@ impl Report {
 
     pub fn new_u16(id: u8, value: u16) -> Self {
         Report {
-            bytes: [id, (value << 8) as u8, (value & 0xFF) as u8, 16],
+            bytes: [id, (value & 0xFF) as u8,(value >> 8) as u8, 16],
         }
     }
 
@@ -88,7 +88,7 @@ impl Report {
     }
 
     pub fn update_u16_value(&mut self, value: u16) {
-        self.bytes[1] = (value << 8) as u8;
+        self.bytes[1] = (value >> 8) as u8;
         self.bytes[2] = (value & 0xFF) as u8;
     }
 }

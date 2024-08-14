@@ -9,7 +9,7 @@ use stm32f4xx_hal::{
 // Create a Global Variable for the GPIO Peripheral that I'm going to pass around.
 pub static G_BUTTON: Mutex<RefCell<Option<gpio::PB8<Input>>>> = Mutex::new(RefCell::new(None));
 // Create a Global Variable for the state
-pub static G_STATE: Mutex<Cell<bool>> = Mutex::new(Cell::new(true));
+pub static G_STATE: Mutex<Cell<bool>> = Mutex::new(Cell::new(false));
 
 #[interrupt]
 fn EXTI9_5() {

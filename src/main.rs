@@ -22,8 +22,10 @@ use crate::intrpt::{G_BUTTON, G_STATE};
 
 use freertos_rust::*;
 use core::alloc::Layout;
+use core::borrow::BorrowMut;
 use crate::report::{HID_PD_PRESENTSTATUS, HID_PD_REMAININGCAPACITY, HID_PD_RUNTIMETOEMPTY, Report, Status};
 use modular_bitfield_to_value::ToValue;
+
 mod devices;
 mod intrpt;
 mod usb;
@@ -127,14 +129,32 @@ fn main() -> ! {
         .priority(TaskPriority(3))
         .start(move || {
             let mut remaining_capacity_report = Report::new_u8(HID_PD_REMAININGCAPACITY, 50);
-            let mut runtime_empty_report = Report::new_u16(HID_PD_RUNTIMETOEMPTY, 230);
+            let mut runtime_empty_report = Report::new_u16(HID_PD_RUNTIMETOEMPTY, 1);
             let mut status = Status::new();
             status.set_charging(1);
             status.set_ac_present(1);
-            status.set_battery_present(1);
+            status.set_battery_present(0);
 
             let mut status_report = Report::new_u16(HID_PD_PRESENTSTATUS, status.to_u16().unwrap());
+            status_report.update_u16_value(status.to_u16().unwrap());
             loop {
+                cortex_m::interrupt::free(|cs| {
+                    if G_STATE
+                        .borrow(cs)
+                        .get() {
+                        status.set_battery_present(1);
+                        status.set_ac_present(0);
+                        status.set_charging(0);
+                        status.set_discharging(1);
+                        status.set_below_rcl(1);
+                        status.set_shutdown_requested(1);
+                        status.set_shutdown_imminent(1);
+                        status_report.update_u16_value(status.to_u16().unwrap());
+                        fault_2_led.on();
+                    } else {
+                        fault_2_led.off();
+                    }
+                });
                 cortex_m::interrupt::free(|cs| {
                     if let Some(hid) = G_USB_HID.borrow(cs).borrow_mut().as_mut() {
                         hid.send_report(&remaining_capacity_report);
