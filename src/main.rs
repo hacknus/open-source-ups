@@ -128,7 +128,11 @@ fn main() -> ! {
         .start(move || {
             let mut remaining_capacity_report = Report::new_u8(HID_PD_REMAININGCAPACITY, 50);
             let mut runtime_empty_report = Report::new_u16(HID_PD_RUNTIMETOEMPTY, 230);
-            let status = Status::new();
+            let mut status = Status::new();
+            status.set_charging(1);
+            status.set_ac_present(1);
+            status.set_battery_present(1);
+
             let mut status_report = Report::new_u16(HID_PD_PRESENTSTATUS, status.to_u16().unwrap());
             loop {
                 cortex_m::interrupt::free(|cs| {
