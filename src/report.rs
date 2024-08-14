@@ -54,16 +54,17 @@ pub struct Status {
     pub discharging: B1,
     pub ac_present: B1,
     pub battery_present: B1,
-    pub below_rcl: B1,
+    pub below_remaining_capacity_limit: B1,
+    pub remaining_time_limit_expired: B1,
     pub need_replace: B1,
     pub voltage_nr: B1,
     pub full_charge: B1,
     pub full_discharge: B1,
     pub shutdown_requested: B1,
     pub shutdown_imminent: B1,
-    pub comm_lost: B1,
+    pub communication_lost: B1,
     pub overload: B1,
-    #[skip] _a: B3,
+    #[skip] _a: B2,
 }
 
 pub struct Report {
@@ -88,8 +89,8 @@ impl Report {
     }
 
     pub fn update_u16_value(&mut self, value: u16) {
-        self.bytes[1] = (value >> 8) as u8;
-        self.bytes[2] = (value & 0xFF) as u8;
+        self.bytes[1] = (value & 0xFF) as u8;
+        self.bytes[2] = (value >> 8) as u8;
     }
 }
 

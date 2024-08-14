@@ -135,8 +135,7 @@ fn main() -> ! {
             status.set_ac_present(1);
             status.set_battery_present(0);
 
-            let mut status_report = Report::new_u16(HID_PD_PRESENTSTATUS, status.to_u16().unwrap());
-            status_report.update_u16_value(status.to_u16().unwrap());
+            let mut status_report = Report::new_u16(HID_PD_PRESENTSTATUS, status.to_u16_le().unwrap());
             loop {
                 cortex_m::interrupt::free(|cs| {
                     if G_STATE
@@ -146,10 +145,11 @@ fn main() -> ! {
                         status.set_ac_present(0);
                         status.set_charging(0);
                         status.set_discharging(1);
-                        status.set_below_rcl(1);
+                        status.set_below_remaining_capacity_limit(1);
+                        status.set_remaining_time_limit_expired(1);
                         status.set_shutdown_requested(1);
                         status.set_shutdown_imminent(1);
-                        status_report.update_u16_value(status.to_u16().unwrap());
+                        status_report.update_u16_value(status.to_u16_le().unwrap());
                         fault_2_led.on();
                     } else {
                         fault_2_led.off();
