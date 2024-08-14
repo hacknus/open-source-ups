@@ -130,12 +130,12 @@ fn main() -> ! {
         .stack_size(1024)
         .priority(TaskPriority(3))
         .start(move || {
-            let mut report = Report::new(50);
+            let mut remaining_report = Report::new(50);
             loop {
                 cortex_m::interrupt::free(|cs| {
                     if let Some(hid) = G_USB_HID.borrow(cs).borrow_mut().as_mut() {
                         // Example: Send a report
-                        hid.send_report(&report);
+                        hid.send_report(&remaining_report);
                         stat_led.toggle();
                     };
                 });
