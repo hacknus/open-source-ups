@@ -25,8 +25,8 @@ use freertos_rust::*;
 use core::alloc::Layout;
 use usb_device::bus::{UsbBusAllocator};
 use usb_device::device::{UsbDeviceBuilder, UsbVidPid};
-use crate::report::{HID_PD_PRESENTSTATUS, HID_PD_REMAININGCAPACITY, HID_PD_RUNTIMETOEMPTY, Report};
-
+use crate::report::{HID_PD_PRESENTSTATUS, HID_PD_REMAININGCAPACITY, HID_PD_RUNTIMETOEMPTY, Report, Status};
+use modular_bitfield_to_value::ToValue;
 mod devices;
 mod commands;
 mod intrpt;
@@ -130,47 +130,32 @@ fn main() -> ! {
         .stack_size(1024)
         .priority(TaskPriority(3))
         .start(move || {
-            let mut report = Report::new(50);
+            let mut remaining_capacity_report = Report::new_u8(HID_PD_REMAININGCAPACITY, 50);
+            let mut runtime_empty_report = Report::new_u16(HID_PD_RUNTIMETOEMPTY, 230);
+            let status = Status::new();
+            let mut status_report = Report::new_u16(HID_PD_PRESENTSTATUS, status.to_u16().unwrap());
             loop {
                 cortex_m::interrupt::free(|cs| {
                     if let Some(hid) = G_USB_HID.borrow(cs).borrow_mut().as_mut() {
-                        // Example: Send a report
-                        report.bytes = [HID_PD_REMAININGCAPACITY, 50, 8,0];
-                        hid.send_report(&report);
-                        // report.bytes = [HID_PD_RUNTIMETOEMPTY, 20, 1];
-                        // hid.send_report(&report);
-                        // report.bytes = [HID_PD_PRESENTSTATUS, 0x00, 1];
-                        // hid.send_report(&report);
+                        hid.send_report(&remaining_capacity_report);
                         stat_led.toggle();
                     };
                 });
-                CurrentTask::delay(Duration::ms(500));
+                CurrentTask::delay(Duration::ms(300));
                 cortex_m::interrupt::free(|cs| {
                     if let Some(hid) = G_USB_HID.borrow(cs).borrow_mut().as_mut() {
-                        // Example: Send a report
-                        // report.bytes = [HID_PD_REMAININGCAPACITY, 50, 1];
-                        // hid.send_report(&report);
-                        report.bytes = [HID_PD_RUNTIMETOEMPTY, 20, 8, 16];
-                        hid.send_report(&report);
-                        // report.bytes = [HID_PD_PRESENTSTATUS, 0x00, 1];
-                        // hid.send_report(&report);
+                        hid.send_report(&runtime_empty_report);
                         stat_led.toggle();
                     };
                 });
-                CurrentTask::delay(Duration::ms(500));
+                CurrentTask::delay(Duration::ms(300));
                 cortex_m::interrupt::free(|cs| {
                     if let Some(hid) = G_USB_HID.borrow(cs).borrow_mut().as_mut() {
-                        // Example: Send a report
-                        // report.bytes = [HID_PD_REMAININGCAPACITY, 50, 1];
-                        // hid.send_report(&report);
-                        // report.bytes = [HID_PD_RUNTIMETOEMPTY, 20, 8, 16];
-                        // hid.send_report(&report);
-                        report.bytes = [HID_PD_PRESENTSTATUS, 0b1100, 8,0];
-                        hid.send_report(&report);
+                        hid.send_report(&status_report);
                         stat_led.toggle();
                     };
                 });
-                CurrentTask::delay(Duration::ms(500));
+                CurrentTask::delay(Duration::ms(300));
             }
         }).unwrap();
 

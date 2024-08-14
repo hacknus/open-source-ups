@@ -5,7 +5,9 @@
 //! common mice so that one could easily reuse it.
 
 use usbd_hid_device::HidReport;
-
+use modular_bitfield::bitfield;
+use modular_bitfield::prelude::*;
+use modular_bitfield_to_value::ToValue;
 
 pub const HID_PD_IPRODUCT: u8 = 0x01;               // FEATURE ONLY
 pub const HID_PD_SERIAL: u8 = 0x02;                 // FEATURE ONLY
@@ -43,18 +45,41 @@ pub const IPRODUCT: u8 = 0x02;
 pub const ISERIAL: u8 = 0x03;
 pub const IMANUFACTURER: u8 = 0x01;
 
+#[derive(Clone, Copy)]
+#[allow(dead_code)]
+#[bitfield(bits = 16)]
+#[derive(ToValue)]
+pub struct Status {
+    pub charging: B1,
+    pub discharging: B1,
+    pub ac_present: B1,
+    pub battery_present: B1,
+    pub below_rcl: B1,
+    pub need_replace: B1,
+    pub voltage_nr: B1,
+    pub full_charge: B1,
+    pub full_discharge: B1,
+    pub shutdown_requested: B1,
+    pub shutdown_imminent: B1,
+    pub comm_lost: B1,
+    pub overload: B1,
+    #[skip] _a: B3,
+}
+
 pub struct Report {
-    // Bytes usage:
-    // byte 0: ID
-    // byte 1: remaining
-    // byte 2: size of remaining
     pub bytes: [u8; 4],
 }
 
 impl Report {
-    pub fn new(remaining: u8) -> Self {
+    pub fn new_u8(id: u8, value: u8) -> Self {
         Report {
-            bytes: [HID_PD_REMAININGCAPACITY, remaining, 8 ,0],
+            bytes: [id, value, 8, 0],
+        }
+    }
+
+    pub fn new_u16(id: u8, value: u16) -> Self {
+        Report {
+            bytes: [id, (value << 8) as u8, (value & 0xFF) as u8, 16],
         }
     }
 }
