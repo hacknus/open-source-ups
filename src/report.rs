@@ -82,6 +82,15 @@ impl Report {
             bytes: [id, (value << 8) as u8, (value & 0xFF) as u8, 16],
         }
     }
+
+    pub fn update_u8_value(&mut self, value: u8) {
+        self.bytes[1] = value;
+    }
+
+    pub fn update_u16_value(&mut self, value: u16) {
+        self.bytes[1] = (value << 8) as u8;
+        self.bytes[2] = (value & 0xFF) as u8;
+    }
 }
 
 impl AsRef<[u8]> for Report {

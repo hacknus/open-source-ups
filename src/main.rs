@@ -11,24 +11,20 @@ use cortex_m::asm;
 use cortex_m_rt::exception;
 use cortex_m_rt::{entry, ExceptionFrame};
 use panic_halt as _;
-use stm32f4xx_hal::otg_fs::{USB, UsbBus};
+use stm32f4xx_hal::otg_fs::{USB};
 use stm32f4xx_hal::{
     pac::{self, Interrupt},
     gpio::{Edge},
     prelude::*,
 };
-use crate::commands::{process_ups_command};
 use crate::devices::led::LED;
 use crate::intrpt::{G_BUTTON, G_STATE};
 
 use freertos_rust::*;
 use core::alloc::Layout;
-use usb_device::bus::{UsbBusAllocator};
-use usb_device::device::{UsbDeviceBuilder, UsbVidPid};
 use crate::report::{HID_PD_PRESENTSTATUS, HID_PD_REMAININGCAPACITY, HID_PD_RUNTIMETOEMPTY, Report, Status};
 use modular_bitfield_to_value::ToValue;
 mod devices;
-mod commands;
 mod intrpt;
 mod usb;
 mod report;
@@ -37,7 +33,7 @@ mod report;
 static GLOBAL: FreeRtosAllocator = FreeRtosAllocator;
 
 
-use crate::usb::{G_USB_DEVICE, G_USB_HID, usb_init};
+use crate::usb::{G_USB_HID, usb_init};
 
 
 #[entry]
