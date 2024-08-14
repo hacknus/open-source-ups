@@ -25,7 +25,7 @@ use freertos_rust::*;
 use core::alloc::Layout;
 use usb_device::bus::{UsbBusAllocator};
 use usb_device::device::{UsbDeviceBuilder, UsbVidPid};
-use crate::report::{Report};
+use crate::report::{HID_PD_PRESENTSTATUS, HID_PD_REMAININGCAPACITY, HID_PD_RUNTIMETOEMPTY, Report};
 
 mod devices;
 mod commands;
@@ -130,12 +130,17 @@ fn main() -> ! {
         .stack_size(1024)
         .priority(TaskPriority(3))
         .start(move || {
-            let mut remaining_report = Report::new(50);
+            let mut report = Report::new(50);
             loop {
                 cortex_m::interrupt::free(|cs| {
                     if let Some(hid) = G_USB_HID.borrow(cs).borrow_mut().as_mut() {
                         // Example: Send a report
-                        hid.send_report(&remaining_report);
+                        report.bytes = [HID_PD_REMAININGCAPACITY, 50, 8];
+                        hid.send_report(&report);
+                        report.bytes = [HID_PD_RUNTIMETOEMPTY, 20, 8];
+                        hid.send_report(&report);
+                        report.bytes = [HID_PD_PRESENTSTATUS, 0x00, 8];
+                        hid.send_report(&report);
                         stat_led.toggle();
                     };
                 });
