@@ -73,7 +73,7 @@ impl HidReport for Report {
         0x09, 0x24, //   USAGE (Sink)
         0xA1, 0x02, //   COLLECTION (Logical)
         0x75, 0x08, //     REPORT_SIZE (8)
-        0x95, 0x03, //     REPORT_COUNT (3)
+        0x95, 0x01, //     REPORT_COUNT (1)
         0x15, 0x00, //     LOGICAL_MINIMUM (0)
         0x26, 0xFF, 0x00, //     LOGICAL_MAXIMUM (255)
         0x85, HID_PD_IPRODUCT, //     REPORT_ID (1)
