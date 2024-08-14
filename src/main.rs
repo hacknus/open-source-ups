@@ -25,11 +25,13 @@ use core::alloc::Layout;
 use core::borrow::BorrowMut;
 use crate::report::{HID_PD_PRESENTSTATUS, HID_PD_REMAININGCAPACITY, HID_PD_RUNTIMETOEMPTY, Report, Status};
 use modular_bitfield_to_value::ToValue;
+use crate::data::DataContainer;
 
 mod devices;
 mod intrpt;
 mod usb;
 mod report;
+mod data;
 
 #[global_allocator]
 static GLOBAL: FreeRtosAllocator = FreeRtosAllocator;
@@ -124,7 +126,7 @@ fn main() -> ! {
     }
 
     Task::new()
-        .name("USB TASK")
+        .name("MAIN TASK")
         .stack_size(1024)
         .priority(TaskPriority(3))
         .start(move || {
@@ -134,48 +136,87 @@ fn main() -> ! {
             status.set_charging(1);
             status.set_ac_present(1);
             status.set_battery_present(0);
-
             let mut status_report = Report::new_u16(HID_PD_PRESENTSTATUS, status.to_u16_le().unwrap());
+
+            let mut data = DataContainer::default();
+            let mut data_previous = DataContainer::default();
+
             loop {
-                cortex_m::interrupt::free(|cs| {
-                    if G_STATE
-                        .borrow(cs)
-                        .get() {
+
+                // update data container
+
+                if data.battery_voltage != data_previous.battery_voltage {
+                    stat_led.on();
+                    let capacity = (4.25 - 3.5) / (data.battery_voltage - 3.5) * 100.0;
+                    remaining_capacity_report.update_u8_value(capacity as u8);
+                    cortex_m::interrupt::free(|cs| {
+                        if let Some(hid) = G_USB_HID.borrow(cs).borrow_mut().as_mut() {
+                            hid.send_report(&remaining_capacity_report);
+                            stat_led.toggle();
+                        };
+                    });
+                    CurrentTask::delay(Duration::ms(50));
+                    if capacity < 40.0 {
+                        status.set_shutdown_requested(1);
+                        status_report.update_u16_value(status.to_u16_le().unwrap());
+                        cortex_m::interrupt::free(|cs| {
+                            if let Some(hid) = G_USB_HID.borrow(cs).borrow_mut().as_mut() {
+                                hid.send_report(&status_report);
+                            };
+                        });
+                    }
+                    stat_led.off();
+                }
+
+                if data.current != data_previous.current || data.battery_voltage != data_previous.battery_voltage {
+                    stat_led.on();
+                    let total_capacity = 3.7 * 1000.0; // Wh
+                    let remaining_time = total_capacity / data.current / (data.battery_voltage - 3.5);
+                    runtime_empty_report.update_u16_value((remaining_time * 60.0 * 60.0) as u16);
+                    cortex_m::interrupt::free(|cs| {
+                        if let Some(hid) = G_USB_HID.borrow(cs).borrow_mut().as_mut() {
+                            hid.send_report(&runtime_empty_report);
+                        };
+                    });
+                    CurrentTask::delay(Duration::ms(50));
+                    if remaining_time < 60.0 {
+                        status.set_below_remaining_capacity_limit(1);
+                        status.set_remaining_time_limit_expired(1);
+                        status.set_shutdown_imminent(1);
+                        status_report.update_u16_value(status.to_u16_le().unwrap());
+                        cortex_m::interrupt::free(|cs| {
+                            if let Some(hid) = G_USB_HID.borrow(cs).borrow_mut().as_mut() {
+                                hid.send_report(&status_report);
+                            };
+                        });
+                    }
+                    stat_led.off();
+                }
+
+                if data.input_voltage != data_previous.input_voltage {
+                    stat_led.on();
+                    if data.input_voltage < 11.0 {
                         status.set_battery_present(1);
                         status.set_ac_present(0);
                         status.set_charging(0);
                         status.set_discharging(1);
-                        status.set_below_remaining_capacity_limit(1);
-                        status.set_remaining_time_limit_expired(1);
-                        status.set_shutdown_requested(1);
-                        status.set_shutdown_imminent(1);
-                        status_report.update_u16_value(status.to_u16_le().unwrap());
-                        fault_2_led.on();
                     } else {
-                        fault_2_led.off();
+                        status = Status::new();
+                        status.set_battery_present(0);
+                        status.set_ac_present(1);
+                        status.set_charging(1);
+                        status.set_discharging(0);
                     }
-                });
-                cortex_m::interrupt::free(|cs| {
-                    if let Some(hid) = G_USB_HID.borrow(cs).borrow_mut().as_mut() {
-                        hid.send_report(&remaining_capacity_report);
-                        stat_led.toggle();
-                    };
-                });
-                CurrentTask::delay(Duration::ms(300));
-                cortex_m::interrupt::free(|cs| {
-                    if let Some(hid) = G_USB_HID.borrow(cs).borrow_mut().as_mut() {
-                        hid.send_report(&runtime_empty_report);
-                        stat_led.toggle();
-                    };
-                });
-                CurrentTask::delay(Duration::ms(300));
-                cortex_m::interrupt::free(|cs| {
-                    if let Some(hid) = G_USB_HID.borrow(cs).borrow_mut().as_mut() {
-                        hid.send_report(&status_report);
-                        stat_led.toggle();
-                    };
-                });
-                CurrentTask::delay(Duration::ms(300));
+                    status_report.update_u16_value(status.to_u16_le().unwrap());
+                    cortex_m::interrupt::free(|cs| {
+                        if let Some(hid) = G_USB_HID.borrow(cs).borrow_mut().as_mut() {
+                            hid.send_report(&status_report);
+                        };
+                    });
+                    stat_led.off();
+                }
+
+                CurrentTask::delay(Duration::ms(100));
             }
         }).unwrap();
 
