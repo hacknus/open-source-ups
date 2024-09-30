@@ -21,12 +21,13 @@ cortex-m = "0.7"
 cortex-m-rt = "0.7"
 # Panic behaviour, see https://crates.io/keywords/panic-impl for alternatives
 panic-halt = "0.2"
-rtt-target = {version="0.3.1",  features = ["cortex-m"]}
+rtt-target = { version = "0.3.1", features = ["cortex-m"] }
 usb-device = "0.3.2"
 usbd-hid-device = { git = "https://github.com/hacknus/usbd-hid-device" }
 modular-bitfield = "0.11.2"
-modular-bitfield-to-value = { version = "*", git = "https://github.com/hacknus/modular-bitfield-to-value"}
+modular-bitfield-to-value = { version = "*", git = "https://github.com/hacknus/modular-bitfield-to-value" }
 freertos-rust = "*"
+micromath = "2.0.0"
 
 [dependencies.stm32f4xx-hal]
 git = "https://github.com/stm32-rs/stm32f4xx-hal"

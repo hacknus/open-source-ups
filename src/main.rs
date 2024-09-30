@@ -6,6 +6,7 @@
 #![feature(alloc_error_handler)]
 
 extern crate alloc;
+use micromath::F32Ext;
 
 use cortex_m::asm;
 use cortex_m_rt::exception;
@@ -23,12 +24,14 @@ use crate::intrpt::{G_BUTTON, G_STATE};
 use freertos_rust::*;
 use core::alloc::Layout;
 use core::borrow::BorrowMut;
+use core::f32::consts::PI;
 use crate::report::{HID_PD_PRESENTSTATUS, HID_PD_REMAININGCAPACITY, HID_PD_RUNTIMETOEMPTY, Report, Status};
 use modular_bitfield_to_value::ToValue;
 use stm32f4xx_hal::adc::config::{AdcConfig, Dma, SampleTime, Scan, Sequence};
 use stm32f4xx_hal::adc::{Adc, Temperature};
 use stm32f4xx_hal::dma::config::DmaConfig;
 use stm32f4xx_hal::dma::{StreamsTuple, Transfer};
+use stm32f4xx_hal::timer::Channel4;
 use crate::adc::{read_current, read_v_bat, ADC_MEMORY, G_XFR};
 
 mod devices;
@@ -74,8 +77,16 @@ fn main() -> ! {
     let dma2 = StreamsTuple::new(dp.DMA2);
 
     // initialize leds
-    let mut stat_led = LED::new(gpiob.pb1.into_push_pull_output());
+    let led_dim = Channel4::new(gpiob.pb1);
+
     let mut usb_led1 = LED::new(gpioc.pc13.into_push_pull_output());
+
+    // initialize pwm timer 3
+    let mut stat_led_pwm = dp
+        .TIM3
+        .pwm_hz(led_dim, 10000.Hz(), &clocks)
+        .split();
+
 
     // initialize pins
     let mut vin_pin = gpioa.pa2.into_floating_input();
@@ -140,15 +151,17 @@ fn main() -> ! {
     //     G_BUTTON.borrow(cs).replace(Some(sw));
     // });
 
-    stat_led.on();
 
     for i in 0..=3 {
         delay.delay(1000.millis());
         match i {
-            0 => { stat_led.on() }
+            0 => {
+                stat_led_pwm.enable();
+                stat_led_pwm.set_duty(8000)
+            }
             1 => { usb_led1.on() }
             _ => {
-                stat_led.off();
+                stat_led_pwm.disable();
                 usb_led1.off();
             }
         }
@@ -157,7 +170,6 @@ fn main() -> ! {
 
     for _ in 0..=4 {
         delay.delay(200.millis());
-        stat_led.toggle();
     }
 
 
@@ -255,7 +267,7 @@ fn main() -> ! {
                 cortex_m::interrupt::free(|cs| {
                     if let Some(hid) = G_USB_HID.borrow(cs).borrow_mut().as_mut() {
                         hid.send_report(&status_report);
-                        stat_led.toggle();
+                        usb_led1.toggle();
                     };
                 });
 
@@ -268,9 +280,15 @@ fn main() -> ! {
         .stack_size(256)
         .priority(TaskPriority(2))
         .start(move || {
+            let max_duty = stat_led_pwm.get_max_duty();
+            let mut count = 0;
             loop {
-                CurrentTask::delay(Duration::ms(500));
-                usb_led1.toggle();
+                stat_led_pwm.enable();
+                let val = max_duty
+                    - (max_duty as f32 * (count as f32 / 1024.0 * PI).sin()) as u16; // LED1
+                stat_led_pwm.set_duty(val);
+                count += 10;
+                CurrentTask::delay(Duration::ms(10));
             }
         }).unwrap();
 
