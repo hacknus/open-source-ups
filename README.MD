@@ -16,6 +16,7 @@ The hardware is essentially just a charging circuit where the remaining capacity
 ![pcb view](renders/case_2024-Sep-26_11-07-41PM-000_CustomizedView22188058268_png.png)
 
 ## Hardware
+Attention! This pcb does not contain a battery protection circuit - if you wish to implement one, just use the Keystone 1047 battery case instead of the Keystone 1048P and wire a breakout 2S BMS before connecting the batteries to the PCB.
 The hardware can be found in the [hardware folder](hardware), containing step files for the case as well as EAGLE files for the PCB.
 
 ## Flashing the firmware
