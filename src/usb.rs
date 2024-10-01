@@ -26,7 +26,7 @@ pub unsafe fn usb_init(usb: USB) {
     let usb_dev = UsbDeviceBuilder::new(&usb_bus, UsbVidPid(0x03f0, 0x1f06))
         .device_class(USB_CLASS_HID)
         .strings(&[StringDescriptors::default()
-            .manufacturer("Linus Leo Stöckli")
+            .manufacturer("hacknus")
             .product("UPS")
             .serial_number("UPS10")])
         .unwrap()
