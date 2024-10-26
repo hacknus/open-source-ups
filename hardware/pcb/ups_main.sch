@@ -13514,6 +13514,93 @@ Source: &lt;a href="http://www.keyelco.com/product-pdf.cfm?p=13959"&gt; Datashee
 </deviceset>
 </devicesets>
 </library>
+<library name="T491D226M035AT" urn="urn:adsk.eagle:library:41356059">
+<description>&lt;T491, Tantalum, MnO2 Tantalum, Commercial Grade, 22 uF, 20%, 35 VDC, 125C, -55C, 85C, SMD, MnO2, Molded, 6 % , 700 mOhms, 7700 nA, 446.84 mg, 7343, 2.8mm, Height Max = 3.1mm, 500, 156  Weeks&lt;/b&gt;&lt;p&gt;
+&lt;author&gt;Created by SamacSys&lt;/author&gt;</description>
+<packages>
+<package name="T491D" urn="urn:adsk.eagle:footprint:41356060/2" library_version="2">
+<description>&lt;b&gt;T491D&lt;/b&gt;&lt;br&gt;
+</description>
+<smd name="1" x="-3.12" y="0" dx="2.43" dy="2.37" layer="1" rot="R90"/>
+<smd name="2" x="3.12" y="0" dx="2.43" dy="2.37" layer="1" rot="R90"/>
+<text x="0" y="0" size="1.27" layer="25" align="center">&gt;NAME</text>
+<text x="0" y="0" size="1.27" layer="27" align="center">&gt;VALUE</text>
+<text x="-4.445" y="2.54" size="1.27" layer="25" align="center">+</text>
+<wire x1="-3.65" y1="2.15" x2="3.65" y2="2.15" width="0.2" layer="51"/>
+<wire x1="3.65" y1="2.15" x2="3.65" y2="-2.15" width="0.2" layer="51"/>
+<wire x1="3.65" y1="-2.15" x2="-3.65" y2="-2.15" width="0.2" layer="51"/>
+<wire x1="-3.65" y1="-2.15" x2="-3.65" y2="2.15" width="0.2" layer="51"/>
+<wire x1="-3.65" y1="2.15" x2="3.65" y2="2.15" width="0.1" layer="21"/>
+<wire x1="3.65" y1="-2.15" x2="-3.65" y2="-2.15" width="0.1" layer="21"/>
+<wire x1="-5.105" y1="3.15" x2="5.105" y2="3.15" width="0.05" layer="51"/>
+<wire x1="5.105" y1="3.15" x2="5.105" y2="-3.15" width="0.05" layer="51"/>
+<wire x1="5.105" y1="-3.15" x2="-5.105" y2="-3.15" width="0.05" layer="51"/>
+<wire x1="-5.105" y1="-3.15" x2="-5.105" y2="3.15" width="0.05" layer="51"/>
+<circle x="-4.72" y="0" radius="0.05" width="0.2" layer="25"/>
+</package>
+</packages>
+<packages3d>
+<package3d name="T491D" urn="urn:adsk.eagle:package:41356062/3" type="model" library_version="2">
+<description>&lt;b&gt;T491D&lt;/b&gt;&lt;br&gt;
+</description>
+<packageinstances>
+<packageinstance name="T491D"/>
+</packageinstances>
+</package3d>
+</packages3d>
+<symbols>
+<symbol name="T491D226M035AT" urn="urn:adsk.eagle:symbol:41356061/1" library_version="2">
+<wire x1="5.08" y1="2.54" x2="5.08" y2="-2.54" width="0.254" layer="94"/>
+<wire x1="5.842" y1="-2.54" x2="5.08" y2="-2.54" width="0.254" layer="94"/>
+<wire x1="5.842" y1="-2.54" x2="5.842" y2="2.54" width="0.254" layer="94"/>
+<wire x1="5.08" y1="2.54" x2="5.842" y2="2.54" width="0.254" layer="94"/>
+<wire x1="4.572" y1="1.27" x2="3.556" y2="1.27" width="0.254" layer="94"/>
+<wire x1="4.064" y1="1.778" x2="4.064" y2="0.762" width="0.254" layer="94"/>
+<wire x1="2.54" y1="0" x2="5.08" y2="0" width="0.254" layer="94"/>
+<wire x1="7.62" y1="0" x2="10.16" y2="0" width="0.254" layer="94"/>
+<text x="8.89" y="6.35" size="1.778" layer="95" align="center-left">&gt;NAME</text>
+<text x="8.89" y="3.81" size="1.778" layer="96" align="center-left">&gt;VALUE</text>
+<pin name="+" x="0" y="0" visible="pad" length="short"/>
+<pin name="-" x="12.7" y="0" visible="pad" length="short" rot="R180"/>
+<polygon width="0.254" layer="94">
+<vertex x="7.62" y="2.54"/>
+<vertex x="7.62" y="-2.54"/>
+<vertex x="6.858" y="-2.54"/>
+<vertex x="6.858" y="2.54"/>
+</polygon>
+</symbol>
+</symbols>
+<devicesets>
+<deviceset name="T491D226M035AT" urn="urn:adsk.eagle:component:41356063/2" prefix="C" library_version="2">
+<description>&lt;b&gt;T491, Tantalum, MnO2 Tantalum, Commercial Grade, 22 uF, 20%, 35 VDC, 125C, -55C, 85C, SMD, MnO2, Molded, 6 % , 700 mOhms, 7700 nA, 446.84 mg, 7343, 2.8mm, Height Max = 3.1mm, 500, 156  Weeks&lt;/b&gt;&lt;p&gt;
+Source: &lt;a href="https://content.kemet.com/datasheets/KEM_T2005_T491.pdf"&gt; Datasheet &lt;/a&gt;</description>
+<gates>
+<gate name="G$1" symbol="T491D226M035AT" x="0" y="0"/>
+</gates>
+<devices>
+<device name="" package="T491D">
+<connects>
+<connect gate="G$1" pin="+" pad="1"/>
+<connect gate="G$1" pin="-" pad="2"/>
+</connects>
+<package3dinstances>
+<package3dinstance package3d_urn="urn:adsk.eagle:package:41356062/3"/>
+</package3dinstances>
+<technologies>
+<technology name="">
+<attribute name="DESCRIPTION" value="T491, Tantalum, MnO2 Tantalum, Commercial Grade, 22 uF, 20%, 35 VDC, 125C, -55C, 85C, SMD, MnO2, Molded, 6 % , 700 mOhms, 7700 nA, 446.84 mg, 7343, 2.8mm, Height Max = 3.1mm, 500, 156  Weeks" constant="no"/>
+<attribute name="HEIGHT" value="3.1mm" constant="no"/>
+<attribute name="MANUFACTURER_NAME" value="KEMET" constant="no"/>
+<attribute name="MANUFACTURER_PART_NUMBER" value="T491D226M035AT" constant="no"/>
+<attribute name="MOUSER_PART_NUMBER" value="80-T491D226M035" constant="no"/>
+<attribute name="MOUSER_PRICE-STOCK" value="https://www.mouser.co.uk/ProductDetail/KEMET/T491D226M035AT?qs=2Dzs5xnho3a9L55s8fyD1A%3D%3D" constant="no"/>
+</technology>
+</technologies>
+</device>
+</devices>
+</deviceset>
+</devicesets>
+</library>
 </libraries>
 <attributes>
 </attributes>
@@ -13683,6 +13770,12 @@ Source: &lt;a href="http://www.keyelco.com/product-pdf.cfm?p=13959"&gt; Datashee
 <part name="P+4" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="VCC" device=""/>
 <part name="+3V10" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="+3V3" device=""/>
 <part name="+3V11" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="+3V3" device=""/>
+<part name="C24" library="T491D226M035AT" library_urn="urn:adsk.eagle:library:41356059" deviceset="T491D226M035AT" device="" package3d_urn="urn:adsk.eagle:package:41356062/3"/>
+<part name="GND12" library="SparkFun-PowerSymbols" deviceset="GND" device=""/>
+<part name="C25" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="C-EU" device="C0603K" package3d_urn="urn:adsk.eagle:package:23680/2" value="1uF"/>
+<part name="GND34" library="SparkFun-PowerSymbols" deviceset="GND" device=""/>
+<part name="GND51" library="SparkFun-PowerSymbols" deviceset="GND" device=""/>
+<part name="C26" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="C-EU" device="C0603K" package3d_urn="urn:adsk.eagle:package:23680/2" value="22uF"/>
 </parts>
 <sheets>
 <sheet>
@@ -13972,9 +14065,9 @@ Iout: 2A Max</text>
 <attribute name="NAME" x="129.921" y="219.456" size="1.778" layer="95" rot="R270"/>
 <attribute name="VALUE" x="132.461" y="224.536" size="1.778" layer="96" rot="R270"/>
 </instance>
-<instance part="C8" gate="G$1" x="45.72" y="241.3" smashed="yes" rot="R270">
-<attribute name="NAME" x="42.164" y="236.601" size="1.778" layer="95"/>
-<attribute name="VALUE" x="37.084" y="239.141" size="1.778" layer="96"/>
+<instance part="C8" gate="G$1" x="53.34" y="241.3" smashed="yes" rot="R270">
+<attribute name="NAME" x="49.784" y="236.601" size="1.778" layer="95"/>
+<attribute name="VALUE" x="44.704" y="239.141" size="1.778" layer="96"/>
 </instance>
 <instance part="R16" gate="G$1" x="116.84" y="210.82" smashed="yes" rot="R90">
 <attribute name="NAME" x="115.3414" y="207.01" size="1.778" layer="95" rot="R90"/>
@@ -14069,9 +14162,9 @@ Iout: 2A Max</text>
 <attribute name="NAME" x="107.696" y="274.828" size="1.778" layer="95" rot="R90"/>
 <attribute name="VALUE" x="117.475" y="272.288" size="1.778" layer="96" rot="R90"/>
 </instance>
-<instance part="L1" gate="G$1" x="35.56" y="243.84" smashed="yes" rot="R90">
-<attribute name="NAME" x="29.21" y="260.35" size="1.778" layer="95" rot="R90" align="center-left"/>
-<attribute name="VALUE" x="31.75" y="260.35" size="1.778" layer="96" rot="R90" align="center-left"/>
+<instance part="L1" gate="G$1" x="43.18" y="243.84" smashed="yes" rot="R90">
+<attribute name="NAME" x="36.83" y="260.35" size="1.778" layer="95" rot="R90" align="center-left"/>
+<attribute name="VALUE" x="39.37" y="260.35" size="1.778" layer="96" rot="R90" align="center-left"/>
 </instance>
 <instance part="GND35" gate="1" x="66.04" y="200.66" smashed="yes">
 <attribute name="VALUE" x="66.04" y="200.406" size="1.778" layer="96" font="vector" align="top-center"/>
@@ -14251,6 +14344,27 @@ Iout: 2A Max</text>
 </instance>
 <instance part="+3V11" gate="G$1" x="111.76" y="297.18" smashed="yes">
 <attribute name="VALUE" x="114.3" y="297.18" size="1.778" layer="96" rot="R90"/>
+</instance>
+<instance part="C24" gate="G$1" x="-27.94" y="312.42" smashed="yes" rot="R270">
+<attribute name="NAME" x="-21.59" y="303.53" size="1.778" layer="95" rot="R270" align="center-left"/>
+<attribute name="VALUE" x="-24.13" y="303.53" size="1.778" layer="96" rot="R270" align="center-left"/>
+</instance>
+<instance part="GND12" gate="1" x="-27.94" y="289.56" smashed="yes">
+<attribute name="VALUE" x="-27.94" y="289.306" size="1.778" layer="96" font="vector" align="top-center"/>
+</instance>
+<instance part="C25" gate="G$1" x="25.4" y="238.76" smashed="yes" rot="R180">
+<attribute name="NAME" x="20.701" y="242.316" size="1.778" layer="95" rot="R270"/>
+<attribute name="VALUE" x="23.241" y="247.396" size="1.778" layer="96" rot="R270"/>
+</instance>
+<instance part="GND34" gate="1" x="25.4" y="213.36" smashed="yes">
+<attribute name="VALUE" x="25.4" y="213.106" size="1.778" layer="96" font="vector" align="top-center"/>
+</instance>
+<instance part="GND51" gate="1" x="35.56" y="213.36" smashed="yes">
+<attribute name="VALUE" x="35.56" y="213.106" size="1.778" layer="96" font="vector" align="top-center"/>
+</instance>
+<instance part="C26" gate="G$1" x="35.56" y="238.76" smashed="yes" rot="R180">
+<attribute name="NAME" x="30.861" y="242.316" size="1.778" layer="95" rot="R270"/>
+<attribute name="VALUE" x="33.401" y="247.396" size="1.778" layer="96" rot="R270"/>
 </instance>
 </instances>
 <busses>
@@ -14601,6 +14715,21 @@ Iout: 2A Max</text>
 <wire x1="-33.02" y1="274.32" x2="-38.1" y2="274.32" width="0.1524" layer="91"/>
 <wire x1="-38.1" y1="274.32" x2="-38.1" y2="266.7" width="0.1524" layer="91"/>
 <pinref part="GND52" gate="1" pin="GND"/>
+</segment>
+<segment>
+<pinref part="C24" gate="G$1" pin="-"/>
+<wire x1="-27.94" y1="299.72" x2="-27.94" y2="292.1" width="0.1524" layer="91"/>
+<pinref part="GND12" gate="1" pin="GND"/>
+</segment>
+<segment>
+<pinref part="C25" gate="G$1" pin="1"/>
+<wire x1="25.4" y1="236.22" x2="25.4" y2="215.9" width="0.1524" layer="91"/>
+<pinref part="GND34" gate="1" pin="GND"/>
+</segment>
+<segment>
+<wire x1="35.56" y1="236.22" x2="35.56" y2="215.9" width="0.1524" layer="91"/>
+<pinref part="GND51" gate="1" pin="GND"/>
+<pinref part="C26" gate="G$1" pin="1"/>
 </segment>
 </net>
 <net name="+3V3" class="0">
@@ -15009,6 +15138,9 @@ Iout: 2A Max</text>
 <wire x1="20.32" y1="243.84" x2="20.32" y2="246.38" width="0.1524" layer="91"/>
 <junction x="20.32" y="246.38"/>
 <label x="25.4" y="251.46" size="1.27" layer="95" rot="R90" xref="yes"/>
+<pinref part="C25" gate="G$1" pin="2"/>
+<wire x1="25.4" y1="243.84" x2="25.4" y2="246.38" width="0.1524" layer="91"/>
+<junction x="25.4" y="246.38"/>
 </segment>
 <segment>
 <pinref part="IC5" gate="G$1" pin="IP+_2"/>
@@ -15093,6 +15225,10 @@ Iout: 2A Max</text>
 <wire x1="-68.58" y1="314.96" x2="-40.64" y2="314.96" width="0.1524" layer="91"/>
 <wire x1="-40.64" y1="314.96" x2="-40.64" y2="317.5" width="0.1524" layer="91"/>
 <pinref part="P+8" gate="1" pin="+12V"/>
+<pinref part="C24" gate="G$1" pin="+"/>
+<wire x1="-27.94" y1="312.42" x2="-27.94" y2="314.96" width="0.1524" layer="91"/>
+<wire x1="-27.94" y1="314.96" x2="-40.64" y2="314.96" width="0.1524" layer="91"/>
+<junction x="-40.64" y="314.96"/>
 </segment>
 </net>
 <net name="N$2" class="0">
@@ -15302,22 +15438,22 @@ Iout: 2A Max</text>
 <net name="N$24" class="0">
 <segment>
 <pinref part="IC4" gate="G$1" pin="BST"/>
-<wire x1="71.12" y1="241.3" x2="48.26" y2="241.3" width="0.1524" layer="91"/>
+<wire x1="71.12" y1="241.3" x2="55.88" y2="241.3" width="0.1524" layer="91"/>
 <pinref part="C8" gate="G$1" pin="1"/>
 </segment>
 </net>
 <net name="N$25" class="0">
 <segment>
 <pinref part="IC4" gate="G$1" pin="SW_2"/>
-<wire x1="71.12" y1="236.22" x2="35.56" y2="236.22" width="0.1524" layer="91"/>
-<wire x1="35.56" y1="236.22" x2="35.56" y2="241.3" width="0.1524" layer="91"/>
+<wire x1="71.12" y1="236.22" x2="43.18" y2="236.22" width="0.1524" layer="91"/>
+<wire x1="43.18" y1="236.22" x2="43.18" y2="241.3" width="0.1524" layer="91"/>
 <pinref part="IC4" gate="G$1" pin="SW_1"/>
 <wire x1="71.12" y1="238.76" x2="71.12" y2="236.22" width="0.1524" layer="91"/>
 <junction x="71.12" y="236.22"/>
 <pinref part="C8" gate="G$1" pin="2"/>
-<wire x1="40.64" y1="241.3" x2="35.56" y2="241.3" width="0.1524" layer="91"/>
-<wire x1="35.56" y1="241.3" x2="35.56" y2="243.84" width="0.1524" layer="91"/>
-<junction x="35.56" y="241.3"/>
+<wire x1="48.26" y1="241.3" x2="43.18" y2="241.3" width="0.1524" layer="91"/>
+<wire x1="43.18" y1="241.3" x2="43.18" y2="243.84" width="0.1524" layer="91"/>
+<junction x="43.18" y="241.3"/>
 <pinref part="L1" gate="G$1" pin="1"/>
 </segment>
 </net>
@@ -15358,13 +15494,6 @@ Iout: 2A Max</text>
 <pinref part="R14" gate="G$1" pin="1"/>
 <wire x1="134.62" y1="241.3" x2="134.62" y2="220.98" width="0.1524" layer="91"/>
 <pinref part="C5" gate="G$1" pin="2"/>
-</segment>
-</net>
-<net name="N$29" class="0">
-<segment>
-<pinref part="C10" gate="G$1" pin="2"/>
-<pinref part="IC4" gate="G$1" pin="VCC"/>
-<wire x1="83.82" y1="210.82" x2="83.82" y2="213.36" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="N$4" class="0">
@@ -15411,19 +15540,19 @@ Iout: 2A Max</text>
 </net>
 <net name="VBAT2" class="0">
 <segment>
-<pinref part="IC4" gate="G$1" pin="EN"/>
-<wire x1="86.36" y1="259.08" x2="86.36" y2="266.7" width="0.1524" layer="91"/>
-<wire x1="86.36" y1="266.7" x2="60.96" y2="266.7" width="0.1524" layer="91"/>
 <pinref part="IC4" gate="G$1" pin="VIN"/>
 <wire x1="71.12" y1="243.84" x2="60.96" y2="243.84" width="0.1524" layer="91"/>
 <wire x1="60.96" y1="243.84" x2="60.96" y2="266.7" width="0.1524" layer="91"/>
-<wire x1="60.96" y1="266.7" x2="35.56" y2="266.7" width="0.1524" layer="91"/>
-<junction x="60.96" y="266.7"/>
+<wire x1="60.96" y1="266.7" x2="43.18" y2="266.7" width="0.1524" layer="91"/>
+<wire x1="43.18" y1="266.7" x2="35.56" y2="266.7" width="0.1524" layer="91"/>
 <wire x1="35.56" y1="266.7" x2="35.56" y2="271.78" width="0.1524" layer="91"/>
 <label x="35.56" y="271.78" size="1.27" layer="95" rot="R90" xref="yes"/>
-<wire x1="35.56" y1="266.7" x2="35.56" y2="264.16" width="0.1524" layer="91"/>
 <junction x="35.56" y="266.7"/>
 <pinref part="L1" gate="G$1" pin="2"/>
+<wire x1="43.18" y1="264.16" x2="43.18" y2="266.7" width="0.1524" layer="91"/>
+<junction x="43.18" y="266.7"/>
+<wire x1="35.56" y1="266.7" x2="35.56" y2="243.84" width="0.1524" layer="91"/>
+<pinref part="C26" gate="G$1" pin="2"/>
 </segment>
 <segment>
 <pinref part="IC5" gate="G$1" pin="IP-_1"/>
@@ -15584,6 +15713,19 @@ Iout: 2A Max</text>
 <wire x1="208.28" y1="134.62" x2="205.74" y2="134.62" width="0.1524" layer="91"/>
 <wire x1="208.28" y1="154.94" x2="208.28" y2="134.62" width="0.1524" layer="91"/>
 <junction x="208.28" y="134.62"/>
+</segment>
+</net>
+<net name="N$37" class="0">
+<segment>
+<pinref part="IC4" gate="G$1" pin="EN"/>
+<wire x1="86.36" y1="259.08" x2="86.36" y2="266.7" width="0.1524" layer="91"/>
+<wire x1="86.36" y1="266.7" x2="68.58" y2="266.7" width="0.1524" layer="91"/>
+<wire x1="68.58" y1="266.7" x2="68.58" y2="210.82" width="0.1524" layer="91"/>
+<pinref part="C10" gate="G$1" pin="2"/>
+<pinref part="IC4" gate="G$1" pin="VCC"/>
+<wire x1="83.82" y1="210.82" x2="83.82" y2="213.36" width="0.1524" layer="91"/>
+<wire x1="68.58" y1="210.82" x2="83.82" y2="210.82" width="0.1524" layer="91"/>
+<junction x="83.82" y="210.82"/>
 </segment>
 </net>
 </nets>
