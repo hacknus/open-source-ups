@@ -13769,13 +13769,13 @@ Source: &lt;a href="https://content.kemet.com/datasheets/KEM_T2005_T491.pdf"&gt;
 <part name="D2" library="SS12" library_urn="urn:adsk.eagle:library:15777239" deviceset="SS12" device="" package3d_urn="urn:adsk.eagle:package:15777242/3"/>
 <part name="P+4" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="VCC" device=""/>
 <part name="+3V10" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="+3V3" device=""/>
-<part name="+3V11" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="+3V3" device=""/>
 <part name="C24" library="T491D226M035AT" library_urn="urn:adsk.eagle:library:41356059" deviceset="T491D226M035AT" device="" package3d_urn="urn:adsk.eagle:package:41356062/3"/>
 <part name="GND12" library="SparkFun-PowerSymbols" deviceset="GND" device=""/>
 <part name="C25" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="C-EU" device="C0603K" package3d_urn="urn:adsk.eagle:package:23680/2" value="1uF"/>
 <part name="GND34" library="SparkFun-PowerSymbols" deviceset="GND" device=""/>
 <part name="GND51" library="SparkFun-PowerSymbols" deviceset="GND" device=""/>
 <part name="C26" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="C-EU" device="C0603K" package3d_urn="urn:adsk.eagle:package:23680/2" value="22uF"/>
+<part name="GND53" library="SparkFun-PowerSymbols" deviceset="GND" device=""/>
 </parts>
 <sheets>
 <sheet>
@@ -14073,9 +14073,9 @@ Iout: 2A Max</text>
 <attribute name="NAME" x="115.3414" y="207.01" size="1.778" layer="95" rot="R90"/>
 <attribute name="VALUE" x="115.062" y="212.09" size="1.778" layer="96" rot="R90"/>
 </instance>
-<instance part="R17" gate="G$1" x="111.76" y="287.02" smashed="yes" rot="R90">
-<attribute name="NAME" x="110.2614" y="283.21" size="1.778" layer="95" rot="R90"/>
-<attribute name="VALUE" x="109.982" y="288.29" size="1.778" layer="96" rot="R90"/>
+<instance part="R17" gate="G$1" x="111.76" y="223.52" smashed="yes" rot="R90">
+<attribute name="NAME" x="110.2614" y="219.71" size="1.778" layer="95" rot="R90"/>
+<attribute name="VALUE" x="109.982" y="224.79" size="1.778" layer="96" rot="R90"/>
 </instance>
 <instance part="C9" gate="G$1" x="104.14" y="220.98" smashed="yes" rot="R180">
 <attribute name="NAME" x="99.441" y="224.536" size="1.778" layer="95" rot="R270"/>
@@ -14158,9 +14158,9 @@ Iout: 2A Max</text>
 <attribute name="NAME" x="11.176" y="249.428" size="1.778" layer="95" rot="R90"/>
 <attribute name="VALUE" x="13.335" y="249.428" size="1.778" layer="96" rot="R90"/>
 </instance>
-<instance part="PGOOD" gate="G$1" x="111.76" y="276.86" smashed="yes">
-<attribute name="NAME" x="107.696" y="274.828" size="1.778" layer="95" rot="R90"/>
-<attribute name="VALUE" x="117.475" y="272.288" size="1.778" layer="96" rot="R90"/>
+<instance part="PGOOD" gate="G$1" x="111.76" y="213.36" smashed="yes">
+<attribute name="NAME" x="107.696" y="211.328" size="1.778" layer="95" rot="R90"/>
+<attribute name="VALUE" x="117.475" y="208.788" size="1.778" layer="96" rot="R90"/>
 </instance>
 <instance part="L1" gate="G$1" x="43.18" y="243.84" smashed="yes" rot="R90">
 <attribute name="NAME" x="36.83" y="260.35" size="1.778" layer="95" rot="R90" align="center-left"/>
@@ -14342,9 +14342,6 @@ Iout: 2A Max</text>
 <instance part="+3V10" gate="G$1" x="7.62" y="274.32" smashed="yes">
 <attribute name="VALUE" x="10.16" y="274.32" size="1.778" layer="96" rot="R90"/>
 </instance>
-<instance part="+3V11" gate="G$1" x="111.76" y="297.18" smashed="yes">
-<attribute name="VALUE" x="114.3" y="297.18" size="1.778" layer="96" rot="R90"/>
-</instance>
 <instance part="C24" gate="G$1" x="-27.94" y="312.42" smashed="yes" rot="R270">
 <attribute name="NAME" x="-21.59" y="303.53" size="1.778" layer="95" rot="R270" align="center-left"/>
 <attribute name="VALUE" x="-24.13" y="303.53" size="1.778" layer="96" rot="R270" align="center-left"/>
@@ -14365,6 +14362,9 @@ Iout: 2A Max</text>
 <instance part="C26" gate="G$1" x="35.56" y="238.76" smashed="yes" rot="R180">
 <attribute name="NAME" x="30.861" y="242.316" size="1.778" layer="95" rot="R270"/>
 <attribute name="VALUE" x="33.401" y="247.396" size="1.778" layer="96" rot="R270"/>
+</instance>
+<instance part="GND53" gate="1" x="111.76" y="200.66" smashed="yes">
+<attribute name="VALUE" x="111.76" y="200.406" size="1.778" layer="96" font="vector" align="top-center"/>
 </instance>
 </instances>
 <busses>
@@ -14731,6 +14731,11 @@ Iout: 2A Max</text>
 <pinref part="GND51" gate="1" pin="GND"/>
 <pinref part="C26" gate="G$1" pin="1"/>
 </segment>
+<segment>
+<pinref part="GND53" gate="1" pin="GND"/>
+<pinref part="PGOOD" gate="G$1" pin="C"/>
+<wire x1="111.76" y1="203.2" x2="111.76" y2="208.28" width="0.1524" layer="91"/>
+</segment>
 </net>
 <net name="+3V3" class="0">
 <segment>
@@ -14850,11 +14855,6 @@ Iout: 2A Max</text>
 <pinref part="+3V10" gate="G$1" pin="+3V3"/>
 <pinref part="R9" gate="G$1" pin="2"/>
 <wire x1="7.62" y1="271.78" x2="7.62" y2="269.24" width="0.1524" layer="91"/>
-</segment>
-<segment>
-<pinref part="+3V11" gate="G$1" pin="+3V3"/>
-<pinref part="R17" gate="G$1" pin="2"/>
-<wire x1="111.76" y1="294.64" x2="111.76" y2="292.1" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="N$20" class="0">
@@ -15423,8 +15423,8 @@ Iout: 2A Max</text>
 <segment>
 <pinref part="IC4" gate="G$1" pin="PG"/>
 <wire x1="101.6" y1="241.3" x2="111.76" y2="241.3" width="0.1524" layer="91"/>
-<pinref part="PGOOD" gate="G$1" pin="C"/>
-<wire x1="111.76" y1="271.78" x2="111.76" y2="241.3" width="0.1524" layer="91"/>
+<pinref part="R17" gate="G$1" pin="2"/>
+<wire x1="111.76" y1="228.6" x2="111.76" y2="241.3" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="N$21" class="0">
@@ -15521,7 +15521,7 @@ Iout: 2A Max</text>
 <segment>
 <pinref part="PGOOD" gate="G$1" pin="A"/>
 <pinref part="R17" gate="G$1" pin="1"/>
-<wire x1="111.76" y1="279.4" x2="111.76" y2="281.94" width="0.1524" layer="91"/>
+<wire x1="111.76" y1="215.9" x2="111.76" y2="218.44" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="N$34" class="0">
