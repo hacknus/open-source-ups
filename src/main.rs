@@ -34,7 +34,7 @@ use stm32f4xx_hal::adc::{Adc, Temperature};
 use stm32f4xx_hal::dma::config::DmaConfig;
 use stm32f4xx_hal::dma::{StreamsTuple, Transfer};
 use stm32f4xx_hal::timer::Channel4;
-use crate::adc::{read_current, read_v_bat, ADC_MEMORY, G_XFR};
+use crate::adc::{read_current, read_v_bat, read_v_in, ADC_MEMORY, G_XFR};
 
 mod devices;
 mod intrpt;
@@ -92,10 +92,10 @@ fn main() -> ! {
 
 
     // initialize pins
-    let mut vin_pin = gpioa.pa2.into_floating_input();
 
     let mut adc_vbat = gpioa.pa0.into_analog();
     let mut adc_current = gpioa.pa1.into_analog();
+    let mut adc_vin = gpioa.pa2.into_analog();
 
     let dma_config = DmaConfig::default()
         .transfer_complete_interrupt(true)
@@ -109,7 +109,8 @@ fn main() -> ! {
 
     adc.configure_channel(&Temperature, Sequence::One, SampleTime::Cycles_480);
     adc.configure_channel(&adc_vbat, Sequence::Two, SampleTime::Cycles_3);
-    adc.configure_channel(&adc_current, Sequence::Two, SampleTime::Cycles_3);
+    adc.configure_channel(&adc_vin, Sequence::Three, SampleTime::Cycles_3);
+    adc.configure_channel(&adc_current, Sequence::Four, SampleTime::Cycles_3);
     adc.enable_temperature_and_vref();
 
     // let adc_buffer = cortex_m::singleton!(: [u16; 2] = [0; 2]).unwrap();
@@ -189,6 +190,7 @@ fn main() -> ! {
         .start(move || {
             let mut current = 0.0;
             let mut vbat = 0.0;
+            let mut vin = 0.0;
             let mut supply_present = false;
             let mut capacity = 0;
             let mut remaining_minutes = 0;
@@ -212,7 +214,8 @@ fn main() -> ! {
             loop {
                 current = read_current();
                 vbat = read_v_bat();
-                supply_present = vin_pin.is_high();
+                vin = read_v_in();
+                supply_present = vin > 10.0;
 
                 if vbat < 4.0 && supply_present {
                     status.set_charging(1);
@@ -281,7 +284,7 @@ fn main() -> ! {
                     if let Some(hid) = G_USB_HID.borrow(cs).borrow_mut().as_mut() {
                         hid.send_report(&status_report);
                         usb_led1.on();
-                        CurrentTask::delay(Duration::ms(50));
+                        CurrentTask::delay(Duration::ms(100));
                         usb_led1.off();
                     };
                 });
@@ -290,7 +293,7 @@ fn main() -> ! {
                     *guard = led_state.clone();
                 }
 
-                CurrentTask::delay(Duration::ms(450));
+                CurrentTask::delay(Duration::ms(400));
             }
         }).unwrap();
 
