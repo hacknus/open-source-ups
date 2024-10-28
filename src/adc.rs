@@ -50,12 +50,12 @@ pub fn read_current() -> f32 {
 }
 
 pub fn read_v_bat() -> f32 {
-    let mut current = 0.0;
+    let mut voltage = 0.0;
 
     cortex_m::interrupt::free(|cs| match G_VBAT.borrow(cs).borrow_mut().as_mut() {
         None => {}
         Some(sampled_voltage) => {
-            current = *sampled_voltage / 3.4 * 12.0;
+            voltage = *sampled_voltage / 3.4 * 12.0;
         }
     });
     // add some delay
@@ -68,16 +68,16 @@ pub fn read_v_bat() -> f32 {
             });
         };
     });
-    current
+    voltage
 }
 
 pub fn read_v_in() -> f32 {
-    let mut current = 0.0;
+    let mut voltage = 0.0;
 
     cortex_m::interrupt::free(|cs| match G_VIN.borrow(cs).borrow_mut().as_mut() {
         None => {}
         Some(sampled_voltage) => {
-            current = *sampled_voltage / 3.4 * 12.0;
+            voltage = *sampled_voltage / 3.4 * 12.0;
         }
     });
     // add some delay
@@ -90,7 +90,7 @@ pub fn read_v_in() -> f32 {
             });
         };
     });
-    current
+    voltage
 }
 
 #[interrupt]

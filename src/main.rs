@@ -227,13 +227,13 @@ fn main() -> ! {
                 }
 
                 if supply_present {
-                    status.set_ac_present(0);
-                    status.set_battery_present(1);
+                    status.set_ac_present(1);
+                    status.set_battery_present(0);
                     status_report.update_u16_value(status.to_u16_le().unwrap());
                     led_state = LEDState::SlowBreathing;
                 } else {
-                    status.set_ac_present(1);
-                    status.set_battery_present(0);
+                    status.set_ac_present(0);
+                    status.set_battery_present(1);
                     status_report.update_u16_value(status.to_u16_le().unwrap());
                     led_state = LEDState::FastBreathing;
                 }
@@ -283,9 +283,7 @@ fn main() -> ! {
                 cortex_m::interrupt::free(|cs| {
                     if let Some(hid) = G_USB_HID.borrow(cs).borrow_mut().as_mut() {
                         hid.send_report(&status_report);
-                        usb_led1.on();
-                        CurrentTask::delay(Duration::ms(200));
-                        usb_led1.off();
+                        usb_led1.toggle();
                     };
                 });
 
@@ -293,7 +291,7 @@ fn main() -> ! {
                     *guard = led_state.clone();
                 }
 
-                CurrentTask::delay(Duration::ms(200));
+                CurrentTask::delay(Duration::ms(500));
             }
         }).unwrap();
 
