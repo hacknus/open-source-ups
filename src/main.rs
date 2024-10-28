@@ -284,7 +284,7 @@ fn main() -> ! {
                     if let Some(hid) = G_USB_HID.borrow(cs).borrow_mut().as_mut() {
                         hid.send_report(&status_report);
                         usb_led1.on();
-                        CurrentTask::delay(Duration::ms(100));
+                        CurrentTask::delay(Duration::ms(200));
                         usb_led1.off();
                     };
                 });
@@ -293,7 +293,7 @@ fn main() -> ! {
                     *guard = led_state.clone();
                 }
 
-                CurrentTask::delay(Duration::ms(400));
+                CurrentTask::delay(Duration::ms(200));
             }
         }).unwrap();
 
