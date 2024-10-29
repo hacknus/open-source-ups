@@ -35,19 +35,22 @@ use stm32f4xx_hal::dma::config::DmaConfig;
 use stm32f4xx_hal::dma::{StreamsTuple, Transfer};
 use stm32f4xx_hal::timer::Channel4;
 use crate::adc::{read_current, read_v_bat, read_v_in, ADC_MEMORY, G_XFR};
+use arrform::{arrform, ArrForm};
 
 mod devices;
 mod intrpt;
-mod usb;
+mod usb_hid;
 mod report;
 mod adc;
 mod utils;
+mod usb_serial;
 
 #[global_allocator]
 static GLOBAL: FreeRtosAllocator = FreeRtosAllocator;
 
 
-use crate::usb::{G_USB_HID, usb_init};
+use crate::usb_hid::{G_USB_HID, usb_hid_init};
+use crate::usb_serial::{usb_println, usb_serial_init};
 use crate::utils::LEDState;
 
 #[entry]
@@ -126,7 +129,7 @@ fn main() -> ! {
     });
 
     // initialize switch
-    let mut sw = gpioc.pc15.into_floating_input();
+    let sw = gpioc.pc15.into_floating_input();
     // let mut syscfg = dp.SYSCFG.constrain();
     // sw.make_interrupt_source(&mut syscfg);
     // sw.trigger_on_edge(&mut dp.EXTI, Edge::Rising);
@@ -143,8 +146,14 @@ fn main() -> ! {
     };
     delay.delay(100.millis());
 
+    let hid_mode = sw.is_high();
+
     unsafe {
-        usb_init(usb);
+        if hid_mode {
+            usb_hid_init(usb);
+        } else {
+            usb_serial_init(usb);
+        }
         cortex_m::peripheral::NVIC::unmask(Interrupt::OTG_FS);
         // Enable the external interrupt in the NVIC by passing the button interrupt number
         // cortex_m::peripheral::NVIC::unmask(sw.interrupt());
@@ -250,11 +259,13 @@ fn main() -> ! {
                 }
 
                 if status.to_u16_le().unwrap() != old_status.to_u16_le().unwrap() {
-                    cortex_m::interrupt::free(|cs| {
-                        if let Some(hid) = G_USB_HID.borrow(cs).borrow_mut().as_mut() {
-                            hid.send_report(&status_report);
-                        };
-                    });
+                    if hid_mode {
+                        cortex_m::interrupt::free(|cs| {
+                            if let Some(hid) = G_USB_HID.borrow(cs).borrow_mut().as_mut() {
+                                hid.send_report(&status_report);
+                            };
+                        });
+                    }
                     old_status = status;
                 }
 
@@ -264,28 +275,36 @@ fn main() -> ! {
                 if capacity != old_capacity {
                     remaining_capacity_report = Report::new_u8(HID_PD_REMAININGCAPACITY, capacity);
                     old_capacity = capacity;
-                    cortex_m::interrupt::free(|cs| {
-                        if let Some(hid) = G_USB_HID.borrow(cs).borrow_mut().as_mut() {
-                            hid.send_report(&remaining_capacity_report);
-                        };
-                    });
+                    if hid_mode {
+                        cortex_m::interrupt::free(|cs| {
+                            if let Some(hid) = G_USB_HID.borrow(cs).borrow_mut().as_mut() {
+                                hid.send_report(&remaining_capacity_report);
+                            };
+                        });
+                    }
                 }
                 if remaining_minutes != old_remaining_minutes {
                     runtime_empty_report = Report::new_u16(HID_PD_RUNTIMETOEMPTY, remaining_minutes);
                     old_remaining_minutes = remaining_minutes;
-                    cortex_m::interrupt::free(|cs| {
-                        if let Some(hid) = G_USB_HID.borrow(cs).borrow_mut().as_mut() {
-                            hid.send_report(&runtime_empty_report);
-                        };
-                    });
+                    if hid_mode {
+                        cortex_m::interrupt::free(|cs| {
+                            if let Some(hid) = G_USB_HID.borrow(cs).borrow_mut().as_mut() {
+                                hid.send_report(&runtime_empty_report);
+                            };
+                        });
+                    }
                 }
 
-                cortex_m::interrupt::free(|cs| {
-                    if let Some(hid) = G_USB_HID.borrow(cs).borrow_mut().as_mut() {
-                        hid.send_report(&status_report);
-                        usb_led1.toggle();
-                    };
-                });
+                if hid_mode {
+                    cortex_m::interrupt::free(|cs| {
+                        if let Some(hid) = G_USB_HID.borrow(cs).borrow_mut().as_mut() {
+                            hid.send_report(&status_report);
+                            usb_led1.toggle();
+                        };
+                    });
+                } else {
+                    usb_println(arrform!(128, "v_bat: {}, v_in: {}, current: {}, remaining_minutes: {}",vbat, vin, current, remaining_minutes ).as_str());
+                }
 
                 if let Ok(mut guard) = led_state_container_main.lock(Duration::ms(1)) {
                     *guard = led_state.clone();

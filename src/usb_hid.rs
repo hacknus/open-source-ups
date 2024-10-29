@@ -17,7 +17,7 @@ pub static G_USB_DEVICE: Mutex<RefCell<Option<UsbDevice<UsbBus<USB>>>>> =
     Mutex::new(RefCell::new(None));
 
 #[allow(dead_code)]
-pub unsafe fn usb_init(usb: USB) {
+pub unsafe fn usb_hid_init(usb: USB) {
     static mut EP_MEMORY: [u32; 1024] = [0; 1024];
     static mut USB_BUS: Option<UsbBusAllocator<UsbBusType>> = None;
     USB_BUS = Some(UsbBusType::new(usb, &mut EP_MEMORY));
