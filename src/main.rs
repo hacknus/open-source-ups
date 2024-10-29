@@ -49,7 +49,7 @@ mod usb_serial;
 static GLOBAL: FreeRtosAllocator = FreeRtosAllocator;
 
 
-use crate::usb_hid::{G_USB_HID, usb_hid_init};
+use crate::usb_hid::{G_USB_HID, usb_hid_init, G_USB_DEVICE, G_USB_HID_MODE};
 use crate::usb_serial::{usb_println, usb_serial_init};
 use crate::utils::LEDState;
 
@@ -147,6 +147,9 @@ fn main() -> ! {
     delay.delay(100.millis());
 
     let hid_mode = sw.is_high();
+    cortex_m::interrupt::free(|cs| {
+        *G_USB_HID_MODE.borrow(cs).borrow_mut() = hid_mode;
+    });
 
     unsafe {
         if hid_mode {
