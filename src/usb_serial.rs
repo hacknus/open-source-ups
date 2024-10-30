@@ -7,13 +7,10 @@ use stm32f4xx_hal::pac::interrupt;
 use usb_device::bus::UsbBusAllocator;
 use usb_device::prelude::*;
 use usbd_serial::SerialPort;
+use crate::usb_hid::G_USB_DEVICE;
 
 // Make USB serial device globally available
 pub static G_USB_SERIAL: Mutex<RefCell<Option<SerialPort<UsbBus<USB>>>>> =
-    Mutex::new(RefCell::new(None));
-
-// Make USB device globally available
-pub static G_USB_DEVICE: Mutex<RefCell<Option<UsbDevice<UsbBus<USB>>>>> =
     Mutex::new(RefCell::new(None));
 
 pub static mut EP_MEMORY: [u32; 1024] = [0; 1024];
