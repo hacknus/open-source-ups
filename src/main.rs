@@ -229,22 +229,24 @@ fn main() -> ! {
                 vin = read_v_in();
                 supply_present = vin > 10.0;
 
-                if vbat < 4.0 && supply_present {
-                    status.set_charging(1);
-                    status_report.update_u16_value(status.to_u16_le().unwrap());
-                } else if !supply_present {
-                    status.set_charging(0);
-                    status.set_discharging(1);
-                    status_report.update_u16_value(status.to_u16_le().unwrap());
-                }
+                // if vbat < 4.0 && supply_present {
+                //     status.set_charging(1);
+                //     status_report.update_u16_value(status.to_u16_le().unwrap());
+                // } else if !supply_present {
+                //     status.set_charging(0);
+                //     status.set_discharging(1);
+                //     status_report.update_u16_value(status.to_u16_le().unwrap());
+                // }
 
                 if supply_present {
                     status.set_ac_present(1);
+                    status.set_charging(1);
                     status.set_battery_present(0);
                     status_report.update_u16_value(status.to_u16_le().unwrap());
                     led_state = LEDState::SlowBreathing;
                 } else {
                     status.set_ac_present(0);
+                    status.set_charging(0);
                     status.set_battery_present(1);
                     status_report.update_u16_value(status.to_u16_le().unwrap());
                     led_state = LEDState::FastBreathing;
