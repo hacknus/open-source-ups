@@ -205,10 +205,10 @@ fn main() -> ! {
             let mut vin = 0.0;
             let mut supply_present = false;
             let mut capacity = 0;
-            let mut remaining_minutes = 0;
+            let mut remaining_seconds = 0;
 
             let mut old_capacity = 100;
-            let mut old_remaining_minutes = 1;
+            let mut old_remaining_seconds = 1;
 
             let battery_capacity = 2.0 * 3.7 * 2100.0; // Wh
 
@@ -275,7 +275,7 @@ fn main() -> ! {
                 }
 
                 capacity = (100.0 / (4.15 - 3.3) * (vbat - 3.3)) as u8;
-                remaining_minutes = (battery_capacity / vbat / current) as u16;
+                remaining_seconds = (battery_capacity / vbat / current) as u16;
 
                 if capacity != old_capacity {
                     remaining_capacity_report = Report::new_u8(HID_PD_REMAININGCAPACITY, capacity);
@@ -288,9 +288,9 @@ fn main() -> ! {
                         });
                     }
                 }
-                if remaining_minutes != old_remaining_minutes {
-                    runtime_empty_report = Report::new_u16(HID_PD_RUNTIMETOEMPTY, remaining_minutes);
-                    old_remaining_minutes = remaining_minutes;
+                if remaining_seconds != old_remaining_seconds {
+                    runtime_empty_report = Report::new_u16(HID_PD_RUNTIMETOEMPTY, remaining_seconds);
+                    old_remaining_seconds = remaining_seconds;
                     if hid_mode {
                         cortex_m::interrupt::free(|cs| {
                             if let Some(hid) = G_USB_HID.borrow(cs).borrow_mut().as_mut() {
@@ -308,7 +308,7 @@ fn main() -> ! {
                         };
                     });
                 } else {
-                    usb_println(arrform!(128, "v_bat: {}, v_in: {}, current: {}, remaining_minutes: {}",vbat, vin, current, remaining_minutes ).as_str());
+                    usb_println(arrform!(128, "v_bat: {}, v_in: {}, current: {}, remaining seconds: {}",vbat, vin, current, remaining_seconds ).as_str());
                 }
 
                 if let Ok(mut guard) = led_state_container_main.lock(Duration::ms(1)) {
