@@ -1,4 +1,8 @@
 # Open Source UPS
+
+> [!CAUTION]
+> There is an error with the current PCB design. The IC frequently gets toasted.
+
 ![pcb view](renders/case_2024-Sep-26_11-06-38PM-000_CustomizedView4918488942_png.png)
 
 UPS are commonly used in server applications to protect against power outages. For home applications, for example to protect a NAS, small Uninterruptible Power Supplies (UPS) do exist, but they all lack the USB HID communication to shut down the NAS/Server/Host when the battery gets low.
