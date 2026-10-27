@@ -1,0 +1,24 @@
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: .devcontainer/Dockerfile
+    environment:
+      CODEX_APP_SERVER_PORT: "4500"
+      # On macOS the ST-Link is owned by OpenOCD on the host.
+      OPENOCD_HOST: "host.docker.internal"
+      CARGO_TARGET_THUMBV7EM_NONE_EABIHF_RUNNER: "sh .devcontainer/flash.sh"
+
+    init: true
+    ports:
+      - "127.0.0.1:4503:4500"
+    volumes:
+      - ..:/workspace:cached
+
+      # Persists Codex login state and the generated capability token.
+      - codex-data:/home/ubuntu/.codex
+    working_dir: /workspace
+    command: start-codex-server
+
+volumes:
+  codex-data:

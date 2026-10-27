@@ -1,0 +1,31 @@
+{
+  "name": "Open Source UPS (Rust)",
+  "dockerComposeFile": "compose.yaml",
+  "service": "app",
+  "workspaceFolder": "/workspace",
+  "forwardPorts": [
+    4503
+  ],
+  "remoteUser": "ubuntu",
+  "updateRemoteUserUID": true,
+  "overrideCommand": false,
+  "postCreateCommand": "sh .devcontainer/setup-workspace.sh",
+  "customizations": {
+    "jetbrains": {
+      "plugins": [
+        "com.intellij.ml.llm"
+      ]
+    },
+    "vscode": {
+      "settings": {
+        "editor.formatOnSave": true,
+        "python.defaultInterpreterPath": "/opt/venv/bin/python"
+      },
+      "extensions": [
+        "openai.chatgpt",
+        "ms-python.python",
+        "rust-lang.rust-analyzer"
+      ]
+    }
+  }
+}
