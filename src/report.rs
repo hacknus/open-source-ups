@@ -42,6 +42,9 @@ pub struct Telemetry {
     pub capacity: u8,
     pub runtime: u16,
     pub voltage_cv: u16,
+    // Local validity metadata, never serialized onto USB. Current faults do not
+    // invalidate pack voltage/capacity. Unknown runtime is never sent as 65535.
+    pub battery_measurements_valid: bool,
 }
 impl Telemetry {
     pub const fn unknown() -> Self {
@@ -50,10 +53,12 @@ impl Telemetry {
             capacity: 0,
             runtime: u16::MAX,
             voltage_cv: 0,
+            battery_measurements_valid: false,
         }
     }
     pub fn available(self, id: u8) -> bool {
-        self.status & (1 << 12) == 0 || !matches!(id, CAPACITY | RUNTIME | VOLTAGE)
+        (id != RUNTIME || self.runtime != u16::MAX)
+            && (self.battery_measurements_valid || !matches!(id, CAPACITY | RUNTIME | VOLTAGE))
     }
     pub fn report(self, id: u8) -> Option<Report> {
         Some(match id {
@@ -71,7 +76,7 @@ impl Telemetry {
     }
 }
 
-const LIVE_IDS: [u8; 4] = [STATUS, CAPACITY, RUNTIME, VOLTAGE];
+pub const LIVE_IDS: [u8; 4] = [STATUS, CAPACITY, RUNTIME, VOLTAGE];
 pub struct PendingReports {
     pub telemetry: Telemetry,
     dirty: u8,
@@ -85,7 +90,9 @@ impl PendingReports {
     }
     pub fn update(&mut self, telemetry: Telemetry) {
         for (i, id) in LIVE_IDS.iter().enumerate() {
-            if self.telemetry.report(*id) != telemetry.report(*id) {
+            if self.telemetry.report(*id) != telemetry.report(*id)
+                || self.telemetry.available(*id) != telemetry.available(*id)
+            {
                 self.dirty |= 1 << i;
             }
         }
@@ -193,9 +200,9 @@ pub const DESCRIPTOR: &[u8] = &[
     0x00,
     0x66,
     0x01,
-    0x10,
+    0x10, // SI linear seconds
     0x55,
-    0x00, // seconds
+    0x00,
     0x85,
     RUNTIME,
     0x09,

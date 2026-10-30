@@ -8,7 +8,6 @@
 extern crate alloc;
 
 use alloc::sync::Arc;
-use micromath::F32Ext;
 
 use crate::devices::led::LED;
 use cortex_m::asm;
@@ -24,7 +23,6 @@ use stm32f4xx_hal::{
 use crate::battery::BatteryState;
 use arrform::{arrform, ArrForm};
 use core::alloc::Layout;
-use core::f32::consts::PI;
 use freertos_rust::*;
 use stm32f4xx_hal::adc::config::{AdcConfig, Dma, SampleTime, Scan, Sequence};
 use stm32f4xx_hal::adc::{Adc, Temperature};
@@ -36,17 +34,20 @@ mod adc;
 mod battery;
 mod devices;
 mod intrpt;
+mod power;
 mod report;
 mod usb;
 mod usb_hid;
+mod usb_link;
 mod usb_serial;
 mod utils;
 
 #[global_allocator]
 static GLOBAL: FreeRtosAllocator = FreeRtosAllocator;
 
+use crate::power::PowerSource;
 use crate::usb_serial::usb_println;
-use crate::utils::LEDState;
+use crate::utils::{LEDState, LedAnimation};
 
 #[entry]
 fn main() -> ! {
@@ -74,6 +75,11 @@ fn main() -> ! {
 
     // initialize dma
     let dma2 = StreamsTuple::new(dp.DMA2);
+
+    // U7 PB12/PB13 (pins 33/34): active-low LTC4418 VALID1/VALID2.
+    // R46/R45 provide external pull-ups to 3.3 V.
+    let valid1 = gpiob.pb12.into_floating_input();
+    let valid2 = gpiob.pb13.into_floating_input();
 
     // U7 PB1 (pin 27): STAT, TIM3 channel 4.
     let led_dim = Channel4::new(gpiob.pb1);
@@ -147,12 +153,16 @@ fn main() -> ! {
     let initial_sample = adc::measurements(&mut last_sequence);
     let hid_mode = sw.is_high();
     usb::init(usb, hid_mode);
-    usb::update(battery.update(initial_sample), true);
+    let initial_source = PowerSource::from_pin_levels(valid1.is_high(), valid2.is_high());
+    usb::update(battery.update(initial_source, initial_sample), true);
     unsafe {
         cortex_m::peripheral::NVIC::unmask(Interrupt::OTG_FS);
     }
 
-    let led_state = LEDState::SlowBreathing;
+    let led_state = LEDState::for_power(
+        initial_source,
+        initial_sample.map_or(true, |m| m.has_battery_fault()),
+    );
     let led_state_container =
         Arc::new(Mutex::new(led_state).expect("Failed to create led state guard mutex"));
     let led_state_container_main = led_state_container.clone();
@@ -175,7 +185,9 @@ fn main() -> ! {
                 }
                 adc::start_scan();
                 if tick % 25 == 0 {
-                    let telemetry = battery.update(if age < 50 { latest } else { None });
+                    let source = PowerSource::from_pin_levels(valid1.is_high(), valid2.is_high());
+                    let sample = if age < 50 { latest } else { None };
+                    let telemetry = battery.update(source, sample);
                     usb::update(telemetry, tick == 0);
                     if hid_mode {
                         usb_led1.toggle();
@@ -183,7 +195,8 @@ fn main() -> ! {
                         usb_println(
                             arrform!(
                                 128,
-                                "v_bat: {}, v_in: {}, boost current: {}",
+                                "source: {:?}, v_bat: {:?}, v_in: {:?}, boost current: {:?}",
+                                source,
                                 m.pack_v,
                                 m.input_v,
                                 m.boost_current_a
@@ -191,14 +204,16 @@ fn main() -> ! {
                             .as_str(),
                         );
                     } else {
-                        usb_println("ADC measurements unavailable");
+                        usb_println(
+                            arrform!(128, "source: {:?}, ADC measurements unavailable", source)
+                                .as_str(),
+                        );
                     }
                     if let Ok(mut guard) = led_state_container_main.lock(Duration::ms(1)) {
-                        *guard = if telemetry.status & (1 << 2) != 0 {
-                            LEDState::SlowBreathing
-                        } else {
-                            LEDState::FastBreathing
-                        };
+                        *guard = LEDState::for_power(
+                            source,
+                            sample.map_or(true, |m| m.has_battery_fault()),
+                        );
                     }
                 }
                 usb::tick(20);
@@ -215,25 +230,15 @@ fn main() -> ! {
         .priority(TaskPriority(2))
         .start(move || {
             let max_duty = stat_led_pwm.get_max_duty();
-            let mut count = 0;
-            let mut led_state = LEDState::SlowBreathing;
+            let mut animation = LedAnimation::new();
+            let mut led_state = led_state;
             loop {
                 if let Ok(guard) = led_state_container_led.lock(Duration::ms(1)) {
                     led_state = guard.clone();
                 }
                 stat_led_pwm.enable();
-                let val = max_duty - (max_duty as f32 * (count as f32 / 1024.0 * PI).sin()) as u16; // LED1
-                stat_led_pwm.set_duty(val);
-                match led_state {
-                    LEDState::FastBreathing => {
-                        count += 20;
-                        CurrentTask::delay(Duration::ms(5));
-                    }
-                    LEDState::SlowBreathing => {
-                        count += 10;
-                        CurrentTask::delay(Duration::ms(10));
-                    }
-                }
+                stat_led_pwm.set_duty(animation.step(led_state, max_duty, 5));
+                CurrentTask::delay(Duration::ms(5));
             }
         })
         .unwrap();

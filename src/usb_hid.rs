@@ -183,12 +183,7 @@ impl<B: UsbBus> UsbClass<B> for UpsHid<'_, B> {
 }
 
 fn report_index(id: u8) -> Option<usize> {
-    [
-        report::STATUS,
-        report::CAPACITY,
-        report::RUNTIME,
-        report::VOLTAGE,
-    ]
-    .iter()
-    .position(|candidate| *candidate == id)
+    report::LIVE_IDS
+        .iter()
+        .position(|candidate| *candidate == id)
 }

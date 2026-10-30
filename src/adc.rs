@@ -39,11 +39,7 @@ pub fn measurements(last_sequence: &mut u32) -> Option<Measurements> {
         return None;
     }
     *last_sequence = scan.sequence;
-    Measurements::from_adc_volts(
-        scan.raw[1] as f32 * scale,
-        scan.raw[2] as f32 * scale,
-        scan.raw[3] as f32 * scale,
-    )
+    Some(Measurements::from_adc_samples(scan.raw, scale))
 }
 
 pub fn start_scan() {
