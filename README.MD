@@ -1,5 +1,8 @@
 # Open Source UPS
 
+[!CAUTION]
+The BOOST circuit in rev 2 cannot provide sufficient current to start a HDD.
+
 ![pcb_view](renders/ups_main_2026-Oct-30_07-44-32PM-000_CustomizedView568957588_png.png)
 
 UPS are commonly used in server applications to protect against power outages. For home applications, for example to protect a NAS, small Uninterruptible Power Supplies (UPS) do exist, but they all lack the USB HID communication to shut down the NAS/Server/Host when the battery gets low.
